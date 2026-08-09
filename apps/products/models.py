@@ -1,12 +1,13 @@
 from django.db import models
 from django.utils.text import slugify
+from library_ghostitzer.storage_backends import get_products_storage
 
 
 class Category(models.Model):
     name = models.CharField(max_length=100, unique=True)
     slug = models.SlugField(max_length=120, unique=True, blank=True)
     description = models.TextField(blank=True)
-    image = models.ImageField(upload_to='categories/', blank=True, null=True)
+    image = models.ImageField(upload_to='categories/', storage=get_products_storage, blank=True, null=True)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -36,7 +37,7 @@ class Product(models.Model):
     codigo = models.CharField(max_length=13, unique=True, db_index=True, blank=True, null=True, verbose_name='Código de barras (EAN-13)')
     stock = models.PositiveIntegerField(default=0)
     umbral = models.PositiveIntegerField(default=10, verbose_name='Umbral de stock')
-    image = models.ImageField(upload_to='products/', blank=True, null=True)
+    image = models.ImageField(upload_to='products/', storage=get_products_storage, blank=True, null=True)
     is_available = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

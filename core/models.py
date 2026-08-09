@@ -1,12 +1,6 @@
 from django.db import models
 from django.conf import settings
-from django.core.files.storage import storages
-
-
-def get_documents_storage():
-    if settings.USE_SUPABASE_STORAGE:
-        return storages.create_storage({'BACKEND': 'library_ghostitzer.storage_backends.DocumentsStorage'})
-    return storages['default']
+from library_ghostitzer.storage_backends import get_documents_storage
 
 
 class Expense(models.Model):

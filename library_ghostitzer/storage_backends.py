@@ -64,3 +64,21 @@ def get_signed_url(field_file) -> str | None:
         return None
     storage = field_file.storage
     return storage.url(field_file.name)
+
+
+def get_products_storage():
+    """Callable para usar como storage= en ImageFields de productos/categorías."""
+    from django.conf import settings
+    if getattr(settings, 'USE_SUPABASE_STORAGE', False):
+        return ProductsStorage()
+    from django.core.files.storage import FileSystemStorage
+    return FileSystemStorage()
+
+
+def get_documents_storage():
+    """Callable para usar como storage= en FileFields de comprobantes."""
+    from django.conf import settings
+    if getattr(settings, 'USE_SUPABASE_STORAGE', False):
+        return DocumentsStorage()
+    from django.core.files.storage import FileSystemStorage
+    return FileSystemStorage()
