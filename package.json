@@ -2,7 +2,8 @@
   "name": "library-ghostitzer",
   "private": true,
   "scripts": {
-    "build": "npm run build:css && npm run build:js",
+    "build": "npm run build:vendor && npm run build:css && npm run build:js",
+    "build:vendor": "node scripts/copy-fontawesome.js",
     "build:css": "tailwindcss -i ./static/src/css/app.css -o ./static/dist/css/app.css --minify",
     "build:js": "esbuild ./static/src/js/app.js --bundle --outfile=./static/dist/js/app.js --minify",
     "dev": "pnpm run build:css -- --watch",

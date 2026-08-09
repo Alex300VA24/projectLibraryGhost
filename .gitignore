@@ -30,6 +30,10 @@ static/vendor/
 .DS_Store
 Thumbs.db
 
+# Binarios / ejecutables
+*.exe
+*.msi
+
 # IDE
 .vscode/
 .idea/
@@ -57,6 +61,3 @@ skills-lock.json
 # Agent instructions
 AGENTS.md
 .impeccable/
-.skills-lock.json
-.PRODUCT.md
-.render_blueprint.yaml
