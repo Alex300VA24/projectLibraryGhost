@@ -1,0 +1,78 @@
+<!-- USUARIOS -->
+      <div x-show="adminSection === 'usuarios' && isAdmin" class="dashboard-surface space-y-6">
+        <div class="flex items-center justify-between">
+          <button x-show="isAdmin" type="button" @click="errorNombreCrear=''; errorApellidoCrear=''; errorUsernameCrear=''; errorEmailCrear=''; errorTelefonoCrear=''; showModalCrearTrabajador = true" class="btn-primary">
+            <i class="fa-solid fa-user-plus text-lg"></i>
+            <span>Registrar Usuario</span>
+          </button>
+        </div>
+        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+          <div class="relative flex-1 w-full">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-ink-400 text-sm"></i>
+            <input x-model="busquedaUsuario" type="text" class="inp pl-9" placeholder="Buscar usuario...">
+          </div>
+          <select x-model="filtroRolUsuario" class="inp w-auto">
+            <option value="">Todos los roles</option>
+            <option value="admin">Administrador</option>
+            <option value="employee">Empleado</option>
+            <option value="client">Cliente</option>
+          </select>
+        </div>
+        <div class="dashboard-panel overflow-hidden fade-up">
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <thead><tr class="tbl-head"><th class="text-left">Usuario</th><th class="text-left">Email</th><th class="text-left">Rol</th><th class="text-left">Estado</th><th class="text-left">Acciones</th></tr></thead>
+              <tbody>
+                <template x-for="usuario in usuariosPg.items" :key="usuario.id">
+                  <tr class="tbl-row">
+                    <td>
+                      <div class="flex items-center gap-2">
+                        <div class="w-7 h-7 rounded-full bg-ink-200 flex items-center justify-center text-ink-600 text-xs font-bold" x-text="usuario.nombre.charAt(0)"></div>
+                        <span class="font-medium text-ink-800 text-sm" x-text="usuario.nombre"></span>
+                      </div>
+                    </td>
+                    <td class="text-ink-500 text-sm" x-text="usuario.email"></td>
+                    <td>
+                      <span class="badge"
+                            :class="{
+                              'bg-purple-100 text-purple-700': usuario.rol === 'admin',
+                              'bg-yellow-100 text-yellow-700': usuario.rol === 'employee',
+                              'bg-special-100 text-special-700': usuario.rol === 'client'
+                            }">
+                            <span class="cb-icon" style="display:none"><i :class="usuario.rol === 'admin' ? 'fa-solid fa-user-shield' : usuario.rol === 'employee' ? 'fa-solid fa-user-tie' : 'fa-solid fa-user'" class="mr-1"></i> </span>
+                            <span x-text="usuario.rol === 'admin' ? 'Administrador' : usuario.rol === 'employee' ? 'Empleado' : 'Cliente'"></span>
+                      </span>
+                    </td>
+
+                    <td><span class="badge" :class="usuario.activo ? 'bg-green-100 text-green-700' : 'bg-ink-100 text-ink-500'"><span class="cb-icon" style="display:none"><i :class="usuario.activo ? 'fa-solid fa-check-circle' : 'fa-solid fa-circle'" class="mr-1"></i> </span><span x-text="usuario.activo ? 'Activo' : 'Inactivo'"></span></span></td>
+                    <td>
+                      <div class="flex gap-1.5">
+                        <button @click="verUsuario(usuario)" class="btn-action-view"><i class="fa-regular fa-eye text-xs"></i></button>
+                        <button @click="editarUsuario(usuario)" class="btn-action-edit"><i class="fa-regular fa-pen-to-square text-xs"></i></button>
+                        <button @click="desactivarUsuario(usuario)" class="btn-action-toggle" :title="usuario.activo ? 'Desactivar' : 'Activar'"><i class="fa-solid fa-power-off text-xs text-red-600"></i></button>
+                      </div>
+                    </td>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
+          </div>
+          <div class="pagination" x-show="usuariosPg.total > 0">
+            <p class="pagination-info">Mostrando <span x-text="((usuariosPg.currentPage - 1) * PER_PAGE) + 1"></span>-<span x-text="Math.min(usuariosPg.currentPage * PER_PAGE, usuariosPg.total)"></span> de <span x-text="usuariosPg.total"></span></p>
+            <div class="pagination-btns">
+              <button @click="usuariosPage = 1" :disabled="usuariosPg.currentPage === 1" class="page-btn"><i class="fa-solid fa-angles-left text-xs"></i></button>
+              <button @click="usuariosPage = Math.max(1, usuariosPage - 1)" :disabled="usuariosPg.currentPage === 1" class="page-btn"><i class="fa-solid fa-chevron-left text-xs"></i></button>
+              <template x-for="p in getPageRange(usuariosPg.currentPage, usuariosPg.totalPages)" :key="'users-'+p">
+                <button x-show="p !== '...'" @click="usuariosPage = p" :class="p === usuariosPg.currentPage ? 'page-active' : ''" class="page-btn" x-text="p"></button>
+                <span x-show="p === '...'" class="page-ellipsis">...</span>
+              </template>
+              <button @click="usuariosPage = Math.min(usuariosPg.totalPages, usuariosPage + 1)" :disabled="usuariosPg.currentPage === usuariosPg.totalPages" class="page-btn"><i class="fa-solid fa-chevron-right text-xs"></i></button>
+              <button @click="usuariosPage = usuariosPg.totalPages" :disabled="usuariosPg.currentPage === usuariosPg.totalPages" class="page-btn"><i class="fa-solid fa-angles-right text-xs"></i></button>
+            </div>
+          </div>
+          <div x-show="usuariosPg.total === 0" class="px-6 py-12 text-center text-ink-400">
+            <i class="fa-solid fa-users text-4xl mb-3 inline-block"></i>
+            <p class="font-display font-600">No se encontraron usuarios</p>
+          </div>
+        </div>
+      </div>

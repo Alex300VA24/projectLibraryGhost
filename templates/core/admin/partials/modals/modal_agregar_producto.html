@@ -1,0 +1,75 @@
+<div x-show="showModalAgregarProducto" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-bg" @click.self="showModalAgregarProducto = false" @keydown.escape.window="showModalAgregarProducto = false" role="dialog" aria-modal="true" aria-labelledby="modal-registrar-producto" style="display:none">
+  <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto" @click.stop>
+    <div class="flex items-center justify-between p-5 border-b border-ink-100">
+      <h3 id="modal-registrar-producto" class="text-2xl font-display font-700 text-ink-900" x-text="formProducto.id ? 'Editar Producto' : 'Registrar Producto'"></h3>
+      <button @click="showModalAgregarProducto = false" class="w-8 h-8 rounded-lg hover:bg-ink-100 flex items-center justify-center text-ink-400" aria-label="Cerrar modal"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="p-5 space-y-4">
+      <div class="bg-blue-50 border border-blue-200 rounded-xl p-3 flex items-start gap-2">
+        <i class="fa-solid fa-circle-info text-blue-500 mt-0.5"></i>
+        <p class="text-sm text-blue-700">Los campos marcados con <span class="text-red-500 font-semibold">*</span> son obligatorios</p>
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        <div class="col-span-2">
+          <label class="block text-xs font-semibold text-ink-500 uppercase tracking-wide mb-1.5 required-field">Nombre</label>
+          <input x-model="formProducto.nombre" type="text" class="inp" placeholder="Nombre del producto" @input="errorNombreProducto = ''">
+          <p x-show="errorNombreProducto" x-text="errorNombreProducto" class="text-xs text-red-500 mt-1"></p>
+        </div>
+        <div class="col-span-2">
+          <label class="block text-xs font-semibold text-ink-500 uppercase tracking-wide mb-1.5">Código de barras <span class="text-ink-400 font-normal lowercase">(opcional, se genera automáticamente si se deja vacío)</span></label>
+          <input x-model="formProducto.codigo" type="text" class="inp" placeholder="Ej: 7750000000042 (13 dígitos)">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-ink-500 uppercase tracking-wide mb-1.5">Umbral de stock</label>
+          <input x-model.number="formProducto.umbral" type="number" min="0" class="inp" placeholder="10">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-ink-500 uppercase tracking-wide mb-1.5 required-field">Categoria</label>
+          <select x-model="formProducto.categoria" class="inp" @change="errorCategoriaProducto = ''">
+            <option value="">Selecciona una categoria</option>
+            <template x-for="cat in categorias" :key="cat.id">
+              <option :value="cat.name" x-text="cat.name"></option>
+            </template>
+          </select>
+          <p x-show="errorCategoriaProducto" x-text="errorCategoriaProducto" class="text-xs text-red-500 mt-1"></p>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-ink-500 uppercase tracking-wide mb-1.5 required-field">Precio de venta (S/)</label>
+          <input x-model.number="formProducto.precio" type="number" step="0.01" min="0.01" class="inp" placeholder="0.00" @input="errorPrecioProducto = ''">
+          <p x-show="errorPrecioProducto" x-text="errorPrecioProducto" class="text-xs text-red-500 mt-1"></p>
+        </div>
+        <div class="col-span-2">
+          <label class="block text-xs font-semibold text-ink-500 uppercase tracking-wide mb-1.5">Imagen del producto <span class="text-ink-400 font-normal lowercase">(opcional)</span></label>
+          <div class="flex items-center gap-4">
+            <div x-show="formProducto.imagenPreview" class="w-16 h-16 rounded-xl overflow-hidden border border-ink-200 flex-shrink-0">
+              <img :src="formProducto.imagenPreview" class="w-full h-full object-cover" x-show="formProducto.imagenPreview">
+            </div>
+            <div x-show="!formProducto.imagenPreview && formProducto.id && formProducto.imagen" class="w-16 h-16 rounded-xl overflow-hidden border border-ink-200 flex-shrink-0">
+              <img :src="formProducto.imagen" class="w-full h-full object-cover">
+            </div>
+            <div class="flex-1">
+              <label class="flex items-center justify-center gap-2 w-full py-2 px-4 border-2 border-dashed border-ink-200 rounded-xl cursor-pointer hover:border-brand-400 transition-colors text-ink-400 hover:text-brand-500">
+                <i class="fa-solid fa-cloud-arrow-up"></i>
+                <span class="text-sm" x-text="formProducto.imagenFile ? formProducto.imagenFile.name : 'Seleccionar imagen'"></span>
+                <input type="file" accept="image/*" class="hidden" @change="handleProductoImagen($event)">
+              </label>
+              <button x-show="formProducto.imagenFile || formProducto.imagenPreview" @click="formProducto.imagenFile = null; formProducto.imagenPreview = null" class="text-xs text-red-500 hover:text-red-600 mt-1"><i class="fa-solid fa-xmark mr-1"></i> Quitar imagen</button>
+            </div>
+          </div>
+        </div>
+        <div class="col-span-2"><label class="block text-xs font-semibold text-ink-500 uppercase tracking-wide mb-1.5">Descripcion <span class="text-ink-400 font-normal lowercase">(opcional)</span></label><textarea x-model="formProducto.descripcion" class="inp" rows="2" placeholder="Descripcion..."></textarea></div>
+      </div>
+      <div class="bg-ink-50 rounded-xl p-3">
+        <p class="text-xs text-ink-400"><i class="fa-solid fa-info-circle mr-1"></i> El precio de compra y stock se definen al registrar lotes para este producto.</p>
+      </div>
+      <div class="flex gap-3">
+        <button @click="showModalAgregarProducto = false" class="btn-ghost flex-1">Cerrar</button>
+        <button @click="guardarProducto()" 
+                class="btn-primary flex-1 py-3 text-sm font-bold shadow-lg shadow-brand-200">
+          <i :class="formProducto.id ? 'fa-solid fa-floppy-disk' : 'fa-solid fa-floppy-disk'" class="text-lg"></i>
+          <span x-text="formProducto.id ? 'Guardar Cambios' : 'Guardar Producto'"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

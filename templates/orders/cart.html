@@ -1,0 +1,14 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Carrito — Libreria Ghostitzer{% endblock %}
+
+{% block content %}
+<div x-data x-init="window.location.href = '/?modal=carrito'">
+  {% include 'core/_navbar.html' %}
+  <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 text-center">
+    <i class="fa-solid fa-spinner fa-spin text-ink-300 text-4xl mb-4"></i>
+    <p class="text-ink-400">Abriendo carrito...</p>
+  </main>
+</div>
+{% endblock %}

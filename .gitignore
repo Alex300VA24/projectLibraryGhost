@@ -1,0 +1,62 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+*.egg
+.venv/
+venv/
+env/
+
+# Django
+*.log
+local_settings.py
+db.sqlite3
+media/
+
+# Django collectstatic output
+staticfiles/
+
+# Node.js
+node_modules/
+pnpm-lock.yaml
+package-lock.json
+
+# Static assets (compiled/generated)
+static/dist/
+static/vendor/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Environment
+.env
+.env.*
+!.env.example
+.env.backup
+
+# opencode
+.opencode/node_modules/
+.opencode/package-lock.json
+.opencode/package.json
+
+# Data backups / dumps
+respaldo_*.json
+
+# Agent tooling
+skills-lock.json
+
+
+.agents/
+.opencode/
+# Agent instructions
+AGENTS.md
+.impeccable/
+.skills-lock.json
+.PRODUCT.md
+.render_blueprint.yaml

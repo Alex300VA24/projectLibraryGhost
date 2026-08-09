@@ -1,0 +1,38 @@
+<!-- MODAL EXPORTAR REPORTE -->
+<div x-show="showModalExportar" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-bg" @click.self="showModalExportar = false" @keydown.escape.window="showModalExportar = false" role="dialog" aria-modal="true" aria-labelledby="modal-exportar-reporte" style="display:none">
+  <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6" @click.stop>
+    <div class="flex items-center justify-between mb-5">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-brand-100 flex items-center justify-center"><i class="fa-solid fa-file-export text-brand-600"></i></div>
+        <div>
+          <h3 id="modal-exportar-reporte" class="text-2xl font-display font-700 text-ink-900">Exportar reporte</h3>
+          <p class="text-xs text-ink-400" x-text="exportarTitulo"></p>
+        </div>
+      </div>
+      <button @click="showModalExportar = false" class="w-8 h-8 rounded-lg hover:bg-ink-100 flex items-center justify-center text-ink-400 hover:text-ink-600 transition-colors" aria-label="Cerrar modal"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="bg-ink-50 rounded-xl p-4 mb-5">
+      <div class="flex items-center justify-between text-sm">
+        <span class="text-ink-500">Periodo</span>
+        <span class="font-semibold text-ink-700" x-text="exportarRangoFecha.inicio + ' al ' + exportarRangoFecha.fin"></span>
+      </div>
+    </div>
+    <p class="text-xs font-semibold text-ink-500 uppercase tracking-wide mb-3">Elige el formato</p>
+    <div class="grid grid-cols-2 gap-3 mb-5">
+      <button @click="seleccionarFormato('pdf')" :class="exportarFormato === 'pdf' ? 'border-brand-500 bg-brand-50 ring-2 ring-brand-200' : 'border-ink-200 hover:border-brand-300'" class="border-2 rounded-xl p-4 text-center transition-all cursor-pointer">
+        <i class="fa-solid fa-file-pdf text-3xl mb-2" :class="exportarFormato === 'pdf' ? 'text-red-500' : 'text-ink-400'"></i>
+        <p class="font-semibold text-sm" :class="exportarFormato === 'pdf' ? 'text-brand-700' : 'text-ink-700'">PDF</p>
+        <p class="text-xs text-ink-400 mt-0.5">Para imprimir o enviar</p>
+      </button>
+      <button @click="seleccionarFormato('excel')" :class="exportarFormato === 'excel' ? 'border-brand-500 bg-brand-50 ring-2 ring-brand-200' : 'border-ink-200 hover:border-brand-300'" class="border-2 rounded-xl p-4 text-center transition-all cursor-pointer">
+        <i class="fa-solid fa-file-excel text-3xl mb-2" :class="exportarFormato === 'excel' ? 'text-green-500' : 'text-ink-400'"></i>
+        <p class="font-semibold text-sm" :class="exportarFormato === 'excel' ? 'text-brand-700' : 'text-ink-700'">Excel</p>
+        <p class="text-xs text-ink-400 mt-0.5">Para analizar datos</p>
+      </button>
+    </div>
+    <div class="flex gap-3">
+      <button @click="confirmarExportar()" class="btn-primary flex-1 py-3 text-sm font-bold shadow-lg shadow-brand-200" :disabled="!exportarFormato"><i class="fa-solid fa-download mr-1"></i> Descargar Reporte</button>
+      <button @click="showModalExportar = false" class="btn-ghost flex-1" aria-label="Cerrar modal">Cerrar</button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,100 @@
+{% extends "emails/base_email.html" %}
+{% load static %}
+
+{% block email_title %}Boleta {{ order.boleta_code }} - {{ company_name }}{% endblock %}
+
+{% block content %}
+<table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;">
+  <tr>
+    <td style="text-align:center;padding-bottom:24px;">
+      <h2 style="margin:0 0 8px;color:#1e3a5f;font-size:22px;font-weight:700;">¡Compra realizada con éxito!</h2>
+      <p style="margin:0;color:#6b7280;font-size:15px;line-height:1.6;">
+        Hola <strong>{{ user.first_name|default:user.username }}</strong>,
+        tu compra ha sido procesada correctamente.
+      </p>
+    </td>
+  </tr>
+  <tr>
+    <td style="padding:20px 0;">
+      <table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;background-color:#f9fafb;border-radius:12px;padding:20px;">
+        <tr>
+          <td>
+            <table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;">
+              <tr>
+                <td style="padding:6px 0;color:#6b7280;font-size:14px;">N° Boleta</td>
+                <td style="padding:6px 0;color:#1e3a5f;font-size:14px;font-weight:600;text-align:right;">{{ order.boleta_code }}</td>
+              </tr>
+              <tr>
+                <td style="padding:6px 0;color:#6b7280;font-size:14px;">Fecha</td>
+                <td style="padding:6px 0;color:#1e3a5f;font-size:14px;font-weight:600;text-align:right;">{{ order.created_at|date:"d/m/Y H:i" }}</td>
+              </tr>
+              <tr>
+                <td style="padding:6px 0;color:#6b7280;font-size:14px;">Método de pago</td>
+                <td style="padding:6px 0;color:#1e3a5f;font-size:14px;font-weight:600;text-align:right;">{{ order.get_payment_method_display|default:"Efectivo" }}</td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <td style="padding:16px 0;">
+      <h3 style="margin:0 0 12px;color:#1e3a5f;font-size:16px;font-weight:600;">Productos</h3>
+      <table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;">
+        <thead>
+          <tr style="border-bottom:2px solid #e5e7eb;">
+            <th style="padding:8px 4px;text-align:left;color:#6b7280;font-size:12px;text-transform:uppercase;">Producto</th>
+            <th style="padding:8px 4px;text-align:center;color:#6b7280;font-size:12px;text-transform:uppercase;">Cant</th>
+            <th style="padding:8px 4px;text-align:right;color:#6b7280;font-size:12px;text-transform:uppercase;">Precio</th>
+            <th style="padding:8px 4px;text-align:right;color:#6b7280;font-size:12px;text-transform:uppercase;">Subtotal</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in order.items.all %}
+          <tr style="border-bottom:1px solid #f3f4f6;">
+            <td style="padding:10px 4px;color:#1e3a5f;font-size:14px;">{{ item.product_name }}</td>
+            <td style="padding:10px 4px;text-align:center;color:#6b7280;font-size:14px;">{{ item.quantity }}</td>
+            <td style="padding:10px 4px;text-align:right;color:#6b7280;font-size:14px;">S/ {{ item.price|floatformat:2 }}</td>
+            <td style="padding:10px 4px;text-align:right;color:#1e3a5f;font-size:14px;font-weight:600;">S/ {{ item.subtotal|floatformat:2 }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="3" style="padding:12px 4px 4px;text-align:right;color:#6b7280;font-size:14px;font-weight:600;">Total</td>
+            <td style="padding:12px 4px 4px;text-align:right;color:#1e3a5f;font-size:18px;font-weight:700;">S/ {{ order.total|floatformat:2 }}</td>
+          </tr>
+        </tfoot>
+      </table>
+    </td>
+  </tr>
+  {% if order.notes %}
+  <tr>
+    <td style="padding:12px 0;">
+      <table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;background-color:#fef3c7;border-radius:8px;padding:12px 16px;">
+        <tr>
+          <td>
+            <p style="margin:0;color:#92400e;font-size:13px;"><strong>Observaciones:</strong> {{ order.notes }}</p>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  {% endif %}
+  <tr>
+    <td style="text-align:center;padding:24px 0 8px;">
+      <a href="{{ protocol|default:'http' }}://{{ domain|default:'localhost' }}/boleta/{{ order.boleta_code }}/"
+         style="display:inline-block;background:linear-gradient(135deg, #1e3a5f 0%, #2a4f7f 100%);color:#ffffff;text-decoration:none;padding:14px 36px;border-radius:10px;font-size:15px;font-weight:600;">
+        Ver boleta online
+      </a>
+    </td>
+  </tr>
+  <tr>
+    <td style="text-align:center;padding-top:20px;">
+      <p style="margin:0;color:#9ca3af;font-size:13px;">¡Gracias por tu compra!</p>
+      <p style="margin:4px 0 0;color:#6b7280;font-size:14px;font-weight:600;">El equipo de {{ company_name }}</p>
+    </td>
+  </tr>
+</table>
+{% endblock %}

@@ -1,0 +1,447 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Crear cuenta — Libreria Ghostitzer{% endblock %}
+
+{% block content %}
+
+<!-- Loading Overlay -->
+<div id="register-loading" style="display:none" class="fixed inset-0 z-[9999] bg-black/40 flex items-center justify-center">
+  <div class="bg-white rounded-2xl shadow-xl p-8 text-center max-w-sm mx-4">
+    <div class="w-16 h-16 rounded-full bg-brand-100 flex items-center justify-center mx-auto mb-4">
+      <i class="fa-solid fa-spinner fa-spin text-brand-600 text-2xl"></i>
+    </div>
+    <h3 class="font-display font-700 text-lg text-ink-900 mb-2">Creando tu cuenta...</h3>
+    <p class="text-ink-400 text-sm">Por favor espera un momento</p>
+  </div>
+</div>
+
+<div class="min-h-screen flex items-center justify-center px-4 py-12">
+  <div class="w-full max-w-3xl fade-up">
+    <div class="text-center mb-8">
+      <a href="/" class="inline-flex items-center gap-2 mb-4">
+        <img src="{% static 'src/images/logo_sin_fondo.png' %}" 
+            alt="Libreria Ghostitzer" 
+            class="w-10 h-10 object-contain block shrink-0">
+        <img src="{% static 'src/images/titulo_libreria.png' %}" alt="Ghostitzer Library" class="h-14 sm:h-16 object-contain">
+      </a>
+      <h1 class="font-display font-800 text-2xl text-ink-900">Crear cuenta</h1>
+      <p class="text-ink-400 text-sm mt-1">Regístrate para empezar a comprar</p>
+      <div class="bg-blue-50 border border-blue-200 rounded-xl p-3 flex items-start gap-2 mt-2">
+        <i class="fa-solid fa-circle-info text-blue-500 mt-0.5"></i>
+        <p class="text-sm text-blue-700">Los campos marcados con <span class="text-red-500 font-semibold">*</span> son obligatorios</p>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-lg border border-ink-100 p-8">
+      <form method="post" class="space-y-4" novalidate>
+        {% csrf_token %}
+        {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-ink-500 uppercase tracking-wide mb-1.5 required-field whitespace-nowrap">Nombres</label>
+            <input type="text" name="first_name" class="inp" placeholder="Sandro Fabrizio" required value="{{ form.first_name.value|default:'' }}" data-validate="name">
+            <p class="field-error mt-1 validation-error" id="first_name-error" style="display:none"><i class="fa-solid fa-circle-exclamation"></i> <span></span></p>
+            {% for error in form.first_name.errors %}<p class="field-error"><i class="fa-solid fa-circle-exclamation"></i> {{ error }}</p>{% endfor %}
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-ink-500 uppercase tracking-wide mb-1.5 required-field whitespace-nowrap">Apellidos</label>
+            <input type="text" name="last_name" class="inp" placeholder="Cárdenas Vilca" required value="{{ form.last_name.value|default:'' }}" data-validate="name">
+            <p class="field-error mt-1 validation-error" id="last_name-error" style="display:none"><i class="fa-solid fa-circle-exclamation"></i> <span></span></p>
+            {% for error in form.last_name.errors %}<p class="field-error"><i class="fa-solid fa-circle-exclamation"></i> {{ error }}</p>{% endfor %}
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-ink-500 uppercase tracking-wide mb-1.5 required-field whitespace-nowrap">Nombre de usuario</label>
+            <input type="text" name="username" class="inp" placeholder="Alex_2026" required value="{{ form.username.value|default:'' }}" data-validate="username">
+            <div class="checklist mt-1 text-xs space-y-0.5" id="username-checklist" style="display:none">
+              <div class="flex items-center gap-1.5 text-ink-400" data-check="minlen"><i class="fa-regular fa-circle"></i> <span>Mínimo 6 caracteres</span></div>
+              <div class="flex items-center gap-1.5 text-ink-400" data-check="noupper"><i class="fa-regular fa-circle"></i> <span>Al menos una mayúscula</span></div>
+              <div class="flex items-center gap-1.5 text-ink-400" data-check="nonum"><i class="fa-regular fa-circle"></i> <span>Al menos un número</span></div>
+              <div class="flex items-center gap-1.5 text-ink-400" data-check="startnum"><i class="fa-regular fa-circle"></i> <span>No comenzar con número</span></div>
+            </div>
+            <p class="field-error mt-1 validation-error" id="username-error" style="display:none"><i class="fa-solid fa-circle-exclamation"></i> <span></span></p>
+            {% for error in form.username.errors %}<p class="field-error"><i class="fa-solid fa-circle-exclamation"></i> {{ error }}</p>{% endfor %}
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-ink-500 uppercase tracking-wide mb-1.5 required-field whitespace-nowrap">Correo electrónico</label>
+            <input type="email" name="email" class="inp" placeholder="sandro@gmail.com" required value="{{ form.email.value|default:'' }}" data-validate="email">
+            <div class="checklist mt-1 text-xs space-y-0.5" id="email-checklist" style="display:none">
+              <div class="flex items-center gap-1.5 text-ink-400" data-check="at"><i class="fa-regular fa-circle"></i> <span>Contener "@"</span></div>
+              <div class="flex items-center gap-1.5 text-ink-400" data-check="local"><i class="fa-regular fa-circle"></i> <span>Nombre de usuario antes del @</span></div>
+              <div class="flex items-center gap-1.5 text-ink-400" data-check="domain"><i class="fa-regular fa-circle"></i> <span>Dominio válido (gmail.com, outlook.com, hotmail.com, live.com, msn.com)</span></div>
+              <div class="flex items-center gap-1.5 text-ink-400" data-check="tld"><i class="fa-regular fa-circle"></i> <span>Extensión (.com, .pe, etc.)</span></div>
+            </div>
+            <p class="field-error mt-1 validation-error" id="email-error" style="display:none"><i class="fa-solid fa-circle-exclamation"></i> <span></span></p>
+            {% for error in form.email.errors %}<p class="field-error"><i class="fa-solid fa-circle-exclamation"></i> {{ error }}</p>{% endfor %}
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-ink-500 uppercase tracking-wide mb-1.5 whitespace-nowrap">Teléfono <span class="text-ink-400 font-normal lowercase">(opcional)</span></label>
+            <input type="text" name="phone" class="inp" placeholder="+51 989 258 496" value="{{ form.phone.value|default:'' }}" data-validate="phone">
+            <p class="field-error mt-1 validation-error" id="phone-error" style="display:none"><i class="fa-solid fa-circle-exclamation"></i> <span></span></p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-ink-500 uppercase tracking-wide mb-1.5 required-field whitespace-nowrap">Contraseña</label>
+            {% include 'accounts/_password_toggle.html' with field_name='password1' field_placeholder='Mínimo 8 caracteres' field_required=True field_autocomplete='new-password' %}
+            <div class="checklist mt-1 text-xs space-y-0.5" id="password1-checklist" style="display:none">
+              <div class="flex items-center gap-1.5 text-ink-400" data-check="minlen"><i class="fa-regular fa-circle"></i> <span>Mínimo 8 caracteres</span></div>
+              <div class="flex items-center gap-1.5 text-ink-400" data-check="upper"><i class="fa-regular fa-circle"></i> <span>Al menos una mayúscula</span></div>
+              <div class="flex items-center gap-1.5 text-ink-400" data-check="lower"><i class="fa-regular fa-circle"></i> <span>Al menos una minúscula</span></div>
+              <div class="flex items-center gap-1.5 text-ink-400" data-check="num"><i class="fa-regular fa-circle"></i> <span>Al menos un número</span></div>
+              <div class="flex items-center gap-1.5 text-ink-400" data-check="special"><i class="fa-regular fa-circle"></i> <span>Al menos un carácter especial</span></div>
+            </div>
+            <p class="field-error mt-1 validation-error" id="password1-error" style="display:none"><i class="fa-solid fa-circle-exclamation"></i> <span></span></p>
+            {% for error in form.password1.errors %}<p class="field-error"><i class="fa-solid fa-circle-exclamation"></i> {{ error }}</p>{% endfor %}
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-ink-500 uppercase tracking-wide mb-1.5 required-field whitespace-nowrap">Confirmar contraseña</label>
+            {% include 'accounts/_password_toggle.html' with field_name='password2' field_placeholder='Repite la contraseña' field_required=True field_autocomplete='new-password' %}
+            <div class="checklist mt-1 text-xs" id="password2-checklist" style="display:none">
+              <div class="flex items-center gap-1.5 text-ink-400" data-check="match"><i class="fa-regular fa-circle"></i> <span>Las contraseñas coinciden</span></div>
+            </div>
+            <p class="field-error mt-1 validation-error" id="password2-error" style="display:none"><i class="fa-solid fa-circle-exclamation"></i> <span></span></p>
+            {% for error in form.password2.errors %}<p class="field-error"><i class="fa-solid fa-circle-exclamation"></i> {{ error }}</p>{% endfor %}
+          </div>
+        </div>
+
+        <button type="submit" class="btn-accent w-full py-3 text-base">
+          Registrarse
+        </button>
+      </form>
+
+      <p class="text-center text-sm text-ink-500 mt-6">
+        ¿Ya tienes cuenta?
+        <a href="{% url 'login' %}{% if next %}?next={{ next }}{% endif %}" class="text-brand-600 font-semibold hover:text-brand-700">Inicia sesión</a>
+      </p>
+    </div>
+
+    <p class="text-center mt-6">
+      <a href="/" class="inline-flex items-center gap-2 text-base font-semibold text-ink-600 hover:text-brand-600 transition-colors bg-ink-100 hover:bg-brand-50 px-5 py-2.5 rounded-xl">
+        <i class="fa-solid fa-arrow-left"></i> Volver al inicio
+      </a>
+    </p>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  var fields = ['first_name', 'last_name', 'username', 'email', 'phone', 'password1', 'password2'];
+  var form = document.querySelector('form');
+
+  function getInput(id) { return document.getElementById(id) || document.querySelector('[name="' + id + '"]') || document.getElementById('id_' + id); }
+  function val(id) { var i = getInput(id); return i ? i.value.trim() : ''; }
+
+  function showError(id, msg) {
+    var e = document.getElementById(id + '-error');
+    if (!e) return false;
+    e.style.display = '';
+    e.querySelector('span').textContent = msg;
+    return false;
+  }
+  function hideError(id) {
+    var e = document.getElementById(id + '-error');
+    if (!e) return;
+    e.style.display = 'none';
+    e.querySelector('span').textContent = '';
+  }
+
+  function validateName(id, label) {
+    var v = val(id);
+    var errors = [];
+    if (!v) { showError(id, label + ' es obligatorio.'); return false; }
+    if (/\d/.test(v)) errors.push('no se permiten números');
+    if (/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]/.test(v)) errors.push('no se permiten caracteres especiales');
+    if (v.length < 2) errors.push('mínimo 2 caracteres');
+    if (errors.length > 0) { showError(id, errors.join(', ') + '.'); return false; }
+    hideError(id);
+    return true;
+  }
+
+  function validateUsername() {
+    var v = val('username');
+    var errors = [];
+    if (!v) { showError('username', 'El nombre de usuario es obligatorio.'); return false; }
+    if (/^[0-9]/.test(v)) errors.push('no puede comenzar con un número');
+    if (!/[A-Z]/.test(v)) errors.push('falta al menos una mayúscula');
+    if (!/[0-9]/.test(v)) errors.push('falta al menos un número');
+    if (/[^a-zA-Z0-9._]/.test(v)) errors.push('solo letras, números, puntos y guiones bajos');
+    if (v.length < 6) errors.push('mínimo 6 caracteres');
+    if (errors.length > 0) { showError('username', errors.join(', ') + '.'); return false; }
+    hideError('username');
+    return true;
+  }
+
+  function validateEmail() {
+    var v = val('email');
+    var dominiosValidos = ['gmail.com', 'outlook.com', 'hotmail.com', 'live.com', 'msn.com', 'unitru.edu.pe'];
+    if (!v) { showError('email', 'El correo es obligatorio.'); return false; }
+
+    var atIdx = v.indexOf('@');
+    if (atIdx === -1) { showError('email', 'Falta el símbolo "@" en el correo.'); return false; }
+
+    var local = v.slice(0, atIdx);
+    var domain = v.slice(atIdx + 1);
+
+    if (!local) { showError('email', 'Falta el nombre de usuario antes del "@".'); return false; }
+    if (!domain) { showError('email', 'Falta el dominio. Usa: ' + dominiosValidos.join(', ') + '.'); return false; }
+
+    if (domain.indexOf('.') === -1) { showError('email', 'Dominio no válido. Usa: ' + dominiosValidos.join(', ') + '.'); return false; }
+
+    var parts = domain.split('.');
+    var tld = parts[parts.length - 1];
+    if (!tld || tld.length < 2) { showError('email', 'Extensión del dominio no válida. Usa: ' + dominiosValidos.join(', ') + '.'); return false; }
+
+    var commonTypos = { 'con': 'com', 'cmo': 'com', 'ocm': 'com', 'ne': 'net', 'ogr': 'org' };
+    if (commonTypos[tld.toLowerCase()]) {
+      showError('email', '¿Quizás quisiste decir ".' + commonTypos[tld.toLowerCase()] + '"? Escribiste ".' + tld + '".');
+      return false;
+    }
+
+    if (!/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+$/.test(local)) {
+      showError('email', 'El nombre de usuario contiene caracteres no válidos.');
+      return false;
+    }
+    var domainLower = domain.toLowerCase();
+    if (dominiosValidos.indexOf(domainLower) === -1) {
+      showError('email', 'Dominio no válido. Usa: ' + dominiosValidos.join(', ') + '.');
+      return false;
+    }
+
+    hideError('email');
+    return true;
+  }
+
+  /* ── Phone: autocomplete +51 + input filter ── */
+  var phoneInput = document.querySelector('[name="phone"]');
+  if (phoneInput) {
+    if (!phoneInput.value) phoneInput.value = '+51 ';
+    phoneInput.addEventListener('focus', function() {
+      if (!this.value || this.value === '+51 ') this.value = '+51 ';
+    });
+    phoneInput.addEventListener('input', function() {
+      var prefix = '+51 ';
+      var numberPart = this.value.indexOf(prefix) === 0 ? this.value.slice(prefix.length) : this.value;
+      var filtered = prefix;
+      var digitCount = 0;
+      for (var i = 0; i < numberPart.length; i++) {
+        var ch = numberPart[i];
+        if (/\d/.test(ch)) {
+          if (digitCount >= 9) continue;
+          digitCount++;
+        }
+        if (/\d/.test(ch) || ch === ' ') {
+          filtered += ch;
+        }
+      }
+      if (filtered !== this.value) {
+        this.value = filtered;
+        var pos = filtered.length;
+        this.setSelectionRange(pos, pos);
+      }
+      if (this.value.indexOf('+51') !== 0) {
+        this.value = '+51 ' + this.value.replace(/^\+?\d*\s*/, '');
+      }
+    });
+  }
+
+  function validatePhone() {
+    var v = val('phone').replace(/^\+51\s*/, '');
+    if (!v || v.trim() === '') { hideError('phone'); return true; }
+    var errors = [];
+    if (/[a-zA-Z]/.test(v)) errors.push('no se permiten letras');
+    if (/[^0-9\s]/.test(v)) errors.push('caracteres no válidos');
+    var digits = v.replace(/\D/g, '');
+    if (digits.length > 0 && digits.length < 7) errors.push('demasiado corto');
+    if (digits.length > 0 && digits.length > 9) errors.push('demasiado largo (máx 9 dígitos)');
+    if (errors.length > 0) { showError('phone', errors.join(', ') + '.'); return false; }
+    hideError('phone');
+    return true;
+  }
+
+  /* ── Real-time checklists for username, email, password ── */
+  function initChecklist(inputId, checklistId, checks) {
+    var input = document.querySelector('[name="' + inputId + '"]') || document.getElementById('id_' + inputId);
+    var list = document.getElementById(checklistId);
+    if (!input || !list) return;
+
+    function update() {
+      var v = input.value;
+      var allDone = true;
+      checks.forEach(function(c) {
+        var item = list.querySelector('[data-check="' + c.key + '"]');
+        if (!item) return;
+        var done = c.test(v);
+        if (done) {
+          item.className = 'flex items-center gap-1.5 text-green-600';
+          item.querySelector('i').className = 'fa-solid fa-circle-check';
+        } else {
+          item.className = 'flex items-center gap-1.5 text-ink-400';
+          item.querySelector('i').className = 'fa-regular fa-circle';
+          allDone = false;
+        }
+      });
+      if (allDone) list.style.display = 'none'; else list.style.display = '';
+    }
+
+    input.addEventListener('focus', function() {
+      var v = input.value;
+      var hasAny = false;
+      checks.forEach(function(c) { if (c.test(v)) hasAny = true; });
+      if (v || hasAny) update();
+      list.style.display = '';
+    });
+    input.addEventListener('blur', function() { list.style.display = 'none'; });
+    input.addEventListener('input', update);
+  }
+
+  initChecklist('username', 'username-checklist', [
+    { key: 'minlen', test: function(v) { return v.length >= 6; } },
+    { key: 'noupper', test: function(v) { return /[A-Z]/.test(v); } },
+    { key: 'nonum', test: function(v) { return /[0-9]/.test(v); } },
+    { key: 'startnum', test: function(v) { return v.length > 0 && !/^[0-9]/.test(v); } },
+  ]);
+
+  initChecklist('email', 'email-checklist', [
+    { key: 'at', test: function(v) { return v.indexOf('@') !== -1; } },
+    { key: 'local', test: function(v) { var a = v.indexOf('@'); return a !== -1 && a > 0; } },
+    { key: 'domain', test: function(v) { var dominiosValidos = ['gmail.com','outlook.com','hotmail.com','live.com','msn.com','unitru.edu.pe']; var a = v.indexOf('@'); if (a === -1) return false; var d = v.slice(a + 1).toLowerCase(); return dominiosValidos.indexOf(d) !== -1; } },
+    { key: 'tld', test: function(v) { var a = v.indexOf('@'); if (a === -1) return false; var p = v.slice(a + 1).split('.'); return p.length > 1 && p[p.length - 1].length >= 2; } },
+  ]);
+
+  initChecklist('password1', 'password1-checklist', [
+    { key: 'minlen', test: function(v) { return v.length >= 8; } },
+    { key: 'upper', test: function(v) { return /[A-Z]/.test(v); } },
+    { key: 'lower', test: function(v) { return /[a-z]/.test(v); } },
+    { key: 'num', test: function(v) { return /[0-9]/.test(v); } },
+    { key: 'special', test: function(v) { return /[^a-zA-Z0-9]/.test(v); } },
+  ]);
+
+  initChecklist('password2', 'password2-checklist', [
+    { key: 'match', test: function(v) {
+      var p1 = document.querySelector('[name="password1"]') || document.getElementById('id_password1');
+      return v.length > 0 && p1 && v === p1.value;
+    } },
+  ]);
+
+  /* ── Sync password2 checklist when password1 changes ── */
+  var p1Input = document.querySelector('[name="password1"]') || document.getElementById('id_password1');
+  if (p1Input) {
+    p1Input.addEventListener('input', function() {
+      var p2Input = document.querySelector('[name="password2"]') || document.getElementById('id_password2');
+      if (p2Input && p2Input.value.length > 0) {
+        var evt = new Event('input');
+        p2Input.dispatchEvent(evt);
+      }
+    });
+  }
+
+  /* ── Name inputs: block numbers and special chars on input ── */
+  var nameInputs = document.querySelectorAll('[name="first_name"], [name="last_name"]');
+  nameInputs.forEach(function(inp) {
+    inp.addEventListener('input', function() {
+      this.value = this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]/g, '');
+    });
+  });
+
+  /* ── Username input: block invalid chars on input ── */
+  var usernameInput = document.querySelector('[name="username"]');
+  if (usernameInput) {
+    usernameInput.addEventListener('input', function() {
+      this.value = this.value.replace(/[^a-zA-Z0-9._]/g, '');
+    });
+  }
+
+  function validatePassword1() {
+    var v = val('password1');
+    var errors = [];
+    if (!v) { showError('password1', 'La contraseña es obligatoria.'); return false; }
+    if (v.length < 8) errors.push('mínimo 8 caracteres');
+    if (!/[A-Z]/.test(v)) errors.push('una mayúscula');
+    if (!/[a-z]/.test(v)) errors.push('una minúscula');
+    if (!/[0-9]/.test(v)) errors.push('un número');
+    if (!/[^a-zA-Z0-9]/.test(v)) errors.push('un carácter especial');
+    if (errors.length > 0) { showError('password1', 'Falta: ' + errors.join(', ') + '.'); return false; }
+    hideError('password1');
+    return true;
+  }
+
+  function validatePassword2() {
+    if (!val('password2')) { showError('password2', 'Confirma tu contraseña.'); return false; }
+    if (val('password2') !== val('password1')) { showError('password2', 'Las contraseñas no coinciden.'); return false; }
+    hideError('password2');
+    return true;
+  }
+
+  var validators = {
+    first_name: function() { return validateName('first_name', 'El nombre'); },
+    last_name: function() { return validateName('last_name', 'El apellido'); },
+    username: validateUsername,
+    email: validateEmail,
+    phone: validatePhone,
+    password1: validatePassword1,
+    password2: validatePassword2,
+  };
+
+  fields.forEach(function(f) {
+    var input = document.querySelector('[name="' + f + '"]') || document.getElementById('id_' + f);
+    if (input) input.addEventListener('blur', validators[f]);
+  });
+
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    var ok = true;
+    fields.forEach(function(f) { if (!validators[f]()) ok = false; });
+
+    if (!ok) {
+      var errMsgs = [];
+      var shown = document.querySelectorAll('.validation-error:not([style*="display: none"])');
+      shown.forEach(function(el) { errMsgs.push('- ' + el.querySelector('span').textContent); });
+      if (errMsgs.length > 0) {
+        var text = errMsgs.join('\n');
+        if (typeof a11yNotify === 'function') {
+          if (!a11yNotify('warning', 'Corrige los siguientes errores', text)) {
+            Swal.fire({ icon: 'warning', title: 'Corrige los siguientes errores', text: text, confirmButtonColor: '#2563eb', customClass: { popup: 'swal2-border-radius' } });
+          }
+        } else {
+          Swal.fire({ icon: 'warning', title: 'Corrige los siguientes errores', text: text, confirmButtonColor: '#2563eb', customClass: { popup: 'swal2-border-radius' } });
+        }
+      }
+      var firstErr = document.querySelector('.validation-error:not([style*="display: none"])');
+      if (firstErr) firstErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+
+    /* ── Show loading overlay and submit ── */
+    document.getElementById('register-loading').style.display = '';
+    form.submit();
+  });
+
+  /* ── Alert on server-side Django errors ── */
+  var djangoErrors = document.querySelectorAll('.field-error:not(.validation-error)');
+  if (djangoErrors.length > 0) {
+    var msgs = [];
+    djangoErrors.forEach(function(el) { msgs.push(el.textContent.trim().replace('�', '').trim()); });
+    var msg = msgs.join('\n');
+    if (typeof a11yNotify === 'function') {
+      if (!a11yNotify('error', 'Corrige los siguientes errores', msg)) {
+        Swal.fire({ icon: 'error', title: 'Corrige los siguientes errores', text: msg, confirmButtonColor: '#2563eb', customClass: { popup: 'swal2-border-radius' } });
+      }
+    } else {
+      Swal.fire({ icon: 'error', title: 'Corrige los siguientes errores', text: msg, confirmButtonColor: '#2563eb', customClass: { popup: 'swal2-border-radius' } });
+    }
+  }
+});
+</script>
+{% endblock %}

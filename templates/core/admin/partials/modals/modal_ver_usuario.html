@@ -1,0 +1,20 @@
+<div x-show="showModalVerUsuario" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-bg" @click.self="showModalVerUsuario = false" @keydown.escape.window="showModalVerUsuario = false" role="dialog" aria-modal="true" aria-labelledby="modal-detalle-usuario" style="display:none">
+  <div class="bg-white rounded-2xl shadow-xl w-full max-w-md" @click.stop>
+    <div class="flex items-center justify-between p-5 border-b border-ink-100">
+      <h3 id="modal-detalle-usuario" class="text-2xl font-display font-700 text-ink-900">Detalle del Usuario</h3>
+      <button @click="showModalVerUsuario = false" class="w-8 h-8 rounded-lg hover:bg-ink-100 flex items-center justify-center text-ink-400" aria-label="Cerrar modal"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="p-5 space-y-4" x-show="usuarioVer">
+      <div class="flex items-center gap-4">
+        <div class="w-14 h-14 rounded-full bg-brand-600 flex items-center justify-center text-white text-xl font-bold" x-text="usuarioVer?.nombre?.charAt(0)"></div>
+        <div><p class="font-display font-700 text-ink-900" x-text="usuarioVer?.nombre"></p><span class="badge" :class="usuarioVer?.rol === 'admin' ? 'role-admin' : usuarioVer?.rol === 'empleado' ? 'role-employee' : 'role-client'" x-text="usuarioVer?.rol"></span></div>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div class="bg-ink-50 rounded-xl p-3"><p class="text-xs text-ink-400 mb-1">Email</p><p class="text-ink-800 text-sm" x-text="usuarioVer?.email"></p></div>
+        <div class="bg-ink-50 rounded-xl p-3"><p class="text-xs text-ink-400 mb-1">Telefono</p><p class="text-ink-800 text-sm" x-text="usuarioVer?.telefono || 'N/A'"></p></div>
+        <div class="bg-ink-50 rounded-xl p-3"><p class="text-xs text-ink-400 mb-1">Estado</p><span class="badge" :class="usuarioVer?.activo ? 'bg-green-100 text-green-700' : 'bg-ink-100 text-ink-500'" x-text="usuarioVer?.activo ? 'Activo' : 'Inactivo'"></span></div>
+        <div class="bg-ink-50 rounded-xl p-3"><p class="text-xs text-ink-400 mb-1">Registro</p><p class="text-ink-800 text-sm" x-text="usuarioVer?.fechaRegistro || '01/06/2026'"></p></div>
+      </div>
+    </div>
+  </div>
+</div>

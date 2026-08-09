@@ -1,0 +1,122 @@
+<!-- GASTOS -->
+      <div x-show="adminSection === 'gastos' && isAdmin" class="dashboard-surface space-y-4">
+        <div class="grid grid-cols-2 xl:grid-cols-4 gap-3">
+          <div class="dashboard-metric-card fade-up p-3 min-h-[9.5rem] flex flex-col justify-between">
+            <div class="flex items-start justify-between gap-2">
+              <div class="space-y-1 min-w-0">
+                <p class="text-[10px] font-semibold uppercase tracking-[0.15em] text-ink-500">Gastos semana</p>
+                <div class="text-xl font-display font-800 text-ink-900" x-text="'S/ ' + ((dashboardData.gastosSemana || 0)).toFixed(2)"></div>
+              </div>
+              <div class="w-10 h-10 rounded-xl flex items-center justify-center text-white shrink-0" style="background:linear-gradient(135deg,#4c5bd0,#8ba3ff);">
+                <i class="fa-solid fa-calendar-week text-sm"></i>
+              </div>
+            </div>
+            <p class="text-xs text-ink-500">Gastos de esta semana</p>
+          </div>
+          <div class="dashboard-metric-card fade-up-d1 p-3 min-h-[9.5rem] flex flex-col justify-between">
+            <div class="flex items-start justify-between gap-2">
+              <div class="space-y-1 min-w-0">
+                <p class="text-[10px] font-semibold uppercase tracking-[0.15em] text-ink-500">Semana anterior</p>
+                <div class="text-xl font-display font-800 text-ink-900" x-text="'S/ ' + ((dashboardData.gastosSemanaAnterior || 0)).toFixed(2)"></div>
+              </div>
+              <div class="w-10 h-10 rounded-xl flex items-center justify-center text-white shrink-0" style="background:linear-gradient(135deg,#0f766e,#14b8a6);">
+                <i class="fa-solid fa-arrow-left-long text-sm"></i>
+              </div>
+            </div>
+            <p class="text-xs text-ink-500">Comparación con la semana previa</p>
+          </div>
+          <div class="dashboard-metric-card fade-up-d2 p-3 min-h-[9.5rem] flex flex-col justify-between">
+            <div class="flex items-start justify-between gap-2">
+              <div class="space-y-1 min-w-0">
+                <p class="text-[10px] font-semibold uppercase tracking-[0.15em] text-ink-500">Gastos mes</p>
+                <div class="text-xl font-display font-800 text-ink-900" x-text="'S/ ' + ((dashboardData.gastosMes || 0)).toFixed(2)"></div>
+              </div>
+              <div class="w-10 h-10 rounded-xl flex items-center justify-center text-white shrink-0" style="background:linear-gradient(135deg,#f59e0b,#fbbf24);">
+                <i class="fa-solid fa-calendar-days text-sm"></i>
+              </div>
+            </div>
+            <p class="text-xs text-ink-500">Gastos acumulados del mes</p>
+          </div>
+          <div class="dashboard-metric-card fade-up-d3 p-3 min-h-[9.5rem] flex flex-col justify-between">
+            <div class="flex items-start justify-between gap-2">
+              <div class="space-y-1 min-w-0">
+                <p class="text-[10px] font-semibold uppercase tracking-[0.15em] text-ink-500">Gastos total</p>
+                <div class="text-xl font-display font-800 text-ink-900" x-text="'S/ ' + ((dashboardData.gastosTotal || 0)).toFixed(2)"></div>
+              </div>
+              <div class="w-10 h-10 rounded-xl flex items-center justify-center text-white shrink-0" style="background:linear-gradient(135deg,#7c3aed,#a78bfa);">
+                <i class="fa-solid fa-coins text-sm"></i>
+              </div>
+            </div>
+            <p class="text-xs text-ink-500">Monto total registrado</p>
+          </div>
+        </div>
+        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+          <div class="flex flex-wrap items-center gap-3">
+            <button type="button" @click="resetFormGasto(); showModalAgregarGasto = true" class="btn-primary">
+              <i class="fa-solid fa-plus-circle text-lg"></i>
+              <span>Registrar Gasto</span>
+            </button>
+            <button type="button" @click="generarReporteGastos()" class="btn-accent">
+              <i class="fa-solid fa-file-pdf text-lg"></i>
+              <span>Reporte de Gastos</span>
+            </button>
+          </div>
+        </div>
+        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+          <div class="flex flex-wrap items-center gap-3 w-full">
+            <div class="relative flex-1 min-w-64">
+              <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-ink-400 text-xs"></i>
+              <input x-model="busquedaGasto" type="text" placeholder="Buscar por ID o concepto..." class="inp pl-9">
+            </div>
+            <input x-model="filtroFechaGasto" type="date" class="inp w-auto">
+            <select x-model="filtroTipoGasto" class="inp w-auto">
+              <option value="">Todos los tipos</option>
+              <option value="Fijo">Fijo</option>
+              <option value="Variable">Variable</option>
+              <option value="Operativo">Operativo</option>
+              <option value="Mantenimiento">Mantenimiento</option>
+            </select>
+          </div>
+        </div>
+        <div class="dashboard-panel overflow-hidden fade-up-d4">
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <thead><tr class="tbl-head"><th class="text-left">ID</th><th class="text-left">Concepto</th><th class="text-left">Tipo</th><th class="text-left">Monto</th><th class="text-left">Fecha</th><th class="text-left">Acciones</th></tr></thead>
+              <tbody>
+                <template x-for="gasto in gastosPg.items" :key="gasto.id">
+                  <tr class="tbl-row">
+                    <td class="font-mono text-xs text-ink-500 font-semibold" x-text="'GAS-' + String(gasto.id).padStart(4, '0')"></td>
+                    <td class="font-medium text-ink-800" x-text="gasto.concepto"></td>
+                    <td><span class="badge" :class="gasto.tipo === 'Fijo' ? 'bg-blue-100 text-blue-700' : gasto.tipo === 'Variable' ? 'bg-sky-100 text-sky-700' : gasto.tipo === 'Operativo' ? 'bg-special-100 text-special-700' : 'bg-ink-100 text-ink-600'"><span class="cb-icon" style="display:none"><i :class="gasto.tipo === 'Fijo' ? 'fa-solid fa-lock' : gasto.tipo === 'Variable' ? 'fa-solid fa-arrows-rotate' : gasto.tipo === 'Operativo' ? 'fa-solid fa-gears' : 'fa-solid fa-wrench'" class="mr-1"></i> </span><span x-text="gasto.tipo"></span></span></td>
+                    <td class="font-display font-700 text-ink-900" x-text="'S/ ' + gasto.monto.toFixed(2)"></td>
+                    <td class="text-ink-400 text-xs" x-text="gasto.fecha"></td>
+                    <td>
+                      <div class="flex gap-1.5">
+                        <button @click="verGasto(gasto)" class="btn-action-view" title="Ver detalle"><i class="fa-regular fa-eye text-xs"></i></button>
+                        <button @click="editarGasto(gasto)" class="btn-action-edit" title="Editar"><i class="fa-regular fa-pen-to-square text-xs"></i></button>
+                      </div>
+                    </td>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
+          </div>
+          <div class="pagination" x-show="gastosPg.total > 0">
+            <p class="pagination-info">Mostrando <span x-text="((gastosPg.currentPage - 1) * PER_PAGE) + 1"></span>-<span x-text="Math.min(gastosPg.currentPage * PER_PAGE, gastosPg.total)"></span> de <span x-text="gastosPg.total"></span></p>
+            <div class="pagination-btns">
+              <button @click="gastosPage = 1" :disabled="gastosPg.currentPage === 1" class="page-btn"><i class="fa-solid fa-angles-left text-xs"></i></button>
+              <button @click="gastosPage = Math.max(1, gastosPage - 1)" :disabled="gastosPg.currentPage === 1" class="page-btn"><i class="fa-solid fa-chevron-left text-xs"></i></button>
+              <template x-for="p in getPageRange(gastosPg.currentPage, gastosPg.totalPages)" :key="'gastos-'+p">
+                <button x-show="p !== '...'" @click="gastosPage = p" :class="p === gastosPg.currentPage ? 'page-active' : ''" class="page-btn" x-text="p"></button>
+                <span x-show="p === '...'" class="page-ellipsis">...</span>
+              </template>
+              <button @click="gastosPage = Math.min(gastosPg.totalPages, gastosPage + 1)" :disabled="gastosPg.currentPage === gastosPg.totalPages" class="page-btn"><i class="fa-solid fa-chevron-right text-xs"></i></button>
+              <button @click="gastosPage = gastosPg.totalPages" :disabled="gastosPg.currentPage === gastosPg.totalPages" class="page-btn"><i class="fa-solid fa-angles-right text-xs"></i></button>
+            </div>
+          </div>
+          <div x-show="gastosPg.total === 0" class="px-6 py-12 text-center text-ink-400">
+            <i class="fa-solid fa-receipt text-4xl mb-3 inline-block"></i>
+            <p class="font-display font-600">No se encontraron gastos</p>
+          </div>
+        </div>
+      </div>

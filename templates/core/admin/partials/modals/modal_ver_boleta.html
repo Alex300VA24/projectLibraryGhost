@@ -1,0 +1,85 @@
+{% load static %}
+
+<style>
+  @media print {
+    body.printing-boleta * {
+      visibility: hidden;
+    }
+    body.printing-boleta .modal-print-area,
+    body.printing-boleta .modal-print-area * {
+      visibility: visible;
+    }
+    body.printing-boleta .modal-print-area {
+      position: fixed;
+      inset: 0;
+      padding: 1.5cm;
+      background: white;
+      z-index: 99999;
+    }
+    body.printing-boleta .modal-print-area .no-print {
+      display: none !important;
+    }
+  }
+</style>
+
+<div x-show="showModalVerBoleta" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-bg" @click.self="showModalVerBoleta = false" @keydown.escape.window="showModalVerBoleta = false" role="dialog" aria-modal="true" aria-labelledby="modal-boleta-venta" style="display:none">
+  <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto" @click.stop>
+    <div class="flex items-center justify-between p-5 border-b border-ink-100 no-print">
+      <h3 id="modal-boleta-venta" class="text-2xl font-display font-700 text-ink-900">Boleta de Venta</h3>
+      <button @click="showModalVerBoleta = false" class="w-8 h-8 rounded-lg hover:bg-ink-100 flex items-center justify-center text-ink-400" aria-label="Cerrar modal"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <template x-if="boletaData">
+      <div class="p-5 modal-print-area">
+        <div class="text-center mb-5">
+          <div class="flex justify-center mb-2">
+            <img src="{% static 'src/images/logo_sin_fondo.png' %}" alt="Libreria Ghostitzer" class="w-14 h-14 object-contain">
+          </div>
+          <h4 class="font-display font-800 text-ink-900 text-lg">Libreria Ghostitzer</h4>
+          <p class="text-xs text-ink-400">Boleta de venta</p>
+        </div>
+        <div class="flex items-center justify-between mb-4 px-1">
+          <div>
+            <p class="text-xs text-ink-400 uppercase tracking-wide font-semibold">Boleta</p>
+            <p class="font-display font-800 text-lg text-ink-900" x-text="boletaData.boleta_code || ''"></p>
+          </div>
+          <div class="text-right">
+            <p class="text-xs text-ink-400 uppercase tracking-wide font-semibold">Fecha</p>
+            <p class="text-ink-700 text-sm" x-text="boletaData.fecha || ''"></p>
+          </div>
+        </div>
+        <div class="border-t border-ink-100 pt-4 mb-4">
+          <h5 class="font-display font-700 text-ink-900 text-sm mb-3">Productos</h5>
+          <div class="space-y-2" x-show="boletaData.items && boletaData.items.length">
+            <template x-for="(item, idx) in (boletaData.items || [])" :key="idx">
+              <div class="flex items-center justify-between py-1.5 border-b border-ink-50">
+                <div class="flex items-center gap-2">
+                  <span class="text-xs text-ink-400 font-mono w-6 text-center" x-text="item.quantity + 'x'"></span>
+                  <span class="text-sm text-ink-800" x-text="item.name"></span>
+                </div>
+                <span class="font-display font-700 text-brand-600 text-sm" x-text="'S/ ' + (item.subtotal || 0).toFixed(2)"></span>
+              </div>
+            </template>
+          </div>
+          <div x-show="!boletaData.items || !boletaData.items.length" class="text-center py-4 text-ink-400 text-sm">
+            <i class="fa-solid fa-box-open text-2xl mb-2 block"></i>
+            <span>Cargando...</span>
+          </div>
+        </div>
+        <div class="bg-brand-50 rounded-xl p-4 border border-brand-200">
+          <div class="flex justify-between text-sm mb-1">
+            <span class="text-ink-500">Total</span>
+            <span class="font-display font-800 text-lg text-brand-700" x-text="'S/ ' + (boletaData.total || 0).toFixed(2)"></span>
+          </div>
+          <div class="flex justify-between text-sm" x-show="boletaData.metodo || boletaData.metodo_key">
+            <span class="text-ink-500">Metodo de pago</span>
+            <span class="badge" :class="paymentBadgeClass(boletaData.metodo_key || boletaData.metodo, '')" x-text="paymentLabel(boletaData.metodo_key || boletaData.metodo, '') || 'Efectivo'"></span>
+          </div>
+        </div>
+        <div class="mt-5 flex gap-3 no-print">
+          <button @click="showModalVerBoleta = false; boletaData = null" class="btn-ghost flex-1" aria-label="Cerrar modal"><i class="fa-solid fa-times mr-1"></i> Cerrar</button>
+          <button @click="imprimirBoleta(boletaData)" class="btn-primary flex-1"><i class="fa-solid fa-print mr-1"></i> Imprimir</button>
+        </div>
+      </div>
+    </template>
+  </div>
+</div>

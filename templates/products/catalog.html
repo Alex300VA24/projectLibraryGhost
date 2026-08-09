@@ -1,0 +1,160 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Catálogo — Libreria Ghostitzer{% endblock %}
+
+{% block content %}
+<div class="ambient-shell min-h-screen">
+  {% include 'core/_navbar.html' %}
+
+  <!-- HERO -->
+  <section class="hero-bg py-14 text-center relative overflow-hidden">
+    <div class="absolute inset-0 opacity-20 pointer-events-none" style="background:radial-gradient(ellipse at 30% 50%,rgba(255,255,255,.3),transparent 60%)"></div>
+    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h1 class="font-display font-800 text-4xl md:text-5xl text-white mb-4">
+        Catálogo de <span class="text-[#ffb238]">productos</span>
+      </h1>
+      <p class="text-blue-100 text-lg max-w-2xl mx-auto">Explora nuestra selección y encuentra lo que necesitas al mejor precio.</p>
+    </div>
+  </section>
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-16" x-data="catalogApp({ search: '{{ search|escapejs }}', category: '{{ selected_category.slug|default:''|escapejs }}', page: {{ page|default:1 }}})" x-init="initCatalog()">
+
+    <!-- BREADCRUMB -->
+    <nav class="mb-4" x-show="categoryName">
+      <div class="inline-flex items-center gap-1.5 text-xs">
+        <!-- Cambiado text-ink-400 por text-blue-600 e idéntico en el hover -->
+        <a href="/catalogo/" class="text-blue-600 hover:text-blue-700 font-medium transition-colors">Catálogo</a>
+        <i class="fa-solid fa-chevron-right text-[.55rem] text-ink-300"></i>
+        <span class="text-ink-600 font-medium" x-text="categoryName"></span>
+      </div>
+    </nav>
+
+    <!-- SEARCH -->
+    <section class="mb-8">
+      <div class="relative w-full sm:w-86">
+        <!-- Agregamos z-10 para que pase por encima del input si este la está tapando -->
+        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-ink-400 text-sm z-10 pointer-events-none"></i>
+        <input x-model="search" @input.debounce.300ms="loadProducts()" type="text"
+              class="inp pl-9 search-catalog w-full" placeholder="Buscar productos..."
+              value="{{ search|default:'' }}">
+      </div>
+    </section>
+
+    <!-- CATEGORY FILTERS -->
+    <div class="flex gap-2 flex-wrap mb-8">
+      <button @click="category = ''; loadProducts()"
+              :class="!category ? 'bg-brand-700 text-white shadow-md shadow-brand-700/20' : 'bg-white text-ink-600 hover:bg-ink-100 border border-ink-200'"
+              class="cat-pill-catalog px-4 py-2 rounded-lg text-sm font-medium">
+        <i class="fa-solid fa-grip text-[.7rem] mr-1"></i> Todos
+      </button>
+      <template x-for="cat in categories" :key="cat.slug">
+        <button @click="category = cat.slug; loadProducts()"
+                :class="category === cat.slug ? 'bg-brand-700 text-white shadow-md shadow-brand-700/20' : 'bg-white text-ink-600 hover:bg-ink-100 border border-ink-200'"
+                class="cat-pill-catalog px-4 py-2 rounded-lg text-sm font-medium"
+                x-text="cat.name"></button>
+      </template>
+    </div>
+
+    <!-- LOADING -->
+    <div x-show="loading" class="text-center py-20">
+      <div class="spinner-catalog mb-4"></div>
+      <p class="text-ink-400 text-sm">Cargando productos...</p>
+    </div>
+
+    <!-- PRODUCT GRID -->
+    <template x-if="!loading">
+      <div>
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+        <template x-for="(product, index) in products" :key="product.id">
+          <div class="prod-card-catalog stagger-in"
+               :style="'transition-delay:' + (index * 50) + 'ms'"
+               x-init="$nextTick(() => { setTimeout(() => $el.classList.add('show'), 30 + index * 50) })">
+            <a :href="'/catalogo/' + product.slug + '/'" class="block relative z-20">
+              <div class="aspect-square bg-ink-50 flex items-center justify-center p-6 overflow-hidden relative prod-img-area">
+                <template x-if="product.stock === 0">
+                  <span class="badge-agotado">Agotado</span>
+                </template>
+                <template x-if="product.image">
+                  <img :src="product.image" :alt="product.name" class="w-full h-full object-contain">
+                </template>
+                <template x-if="!product.image">
+                  <i class="fa-solid fa-box text-ink-300 text-5xl"></i>
+                </template>
+              </div>
+              <div class="p-4">
+                <span class="text-xs text-brand-600 font-semibold uppercase tracking-wide" x-text="product.category"></span>
+                <h3 class="font-display font-700 text-ink-900 text-sm mt-0.5 leading-tight line-clamp-2" x-text="product.name"></h3>
+                <p class="price-catalog text-lg mt-1.5"><span class="price-sym">S/</span><span x-text="product.price.toFixed(2)"></span></p>
+              </div>
+            </a>
+            <a :href="'/catalogo/' + product.slug + '/'" class="view-detail-btn" title="Ver detalle">
+              <i class="fa-solid fa-arrow-right"></i>
+            </a>
+            <button x-show="product.stock > 0" @click.stop="addToCart(product.id)" class="add-cart-expand" style="right: 3.75rem" title="Agregar al carrito">
+              <i class="fa-solid fa-cart-arrow-down text-sm"></i>
+              <span class="cart-label">Agregar</span>
+            </button>
+          </div>
+        </template>
+      </div>
+      <div x-show="products.length > 0" class="mt-8 flex flex-wrap items-center justify-center gap-2 text-sm">
+        <button @click="goToPage(currentPage - 1)"
+                :disabled="currentPage <= 1"
+                class="page-btn px-4 py-2 rounded-lg"
+                :class="currentPage <= 1 ? 'opacity-50 cursor-not-allowed' : ''">
+          Anterior
+        </button>
+
+        <template x-for="page in Array.from({ length: totalPages }, (_, i) => i + 1)" :key="page">
+          <button @click="goToPage(page)"
+                  :class="page === currentPage ? 'page-active bg-blue-600 text-white' : 'page-btn bg-white text-ink-600'"
+                  class="px-4 py-2 rounded-lg">
+            <span x-text="page"></span>
+          </button>
+        </template>
+
+        <button @click="goToPage(currentPage + 1)"
+                :disabled="currentPage >= totalPages"
+                class="page-btn px-4 py-2 rounded-lg"
+                :class="currentPage >= totalPages ? 'opacity-50 cursor-not-allowed' : ''">
+          Siguiente
+        </button>
+      </div>
+    </template>
+
+    <!-- EMPTY STATE -->
+    <div x-show="!loading && products.length === 0" class="text-center py-20">
+      <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-ink-100 mb-4">
+        <i class="fa-solid fa-box-open text-3xl text-ink-300"></i>
+      </div>
+      <h3 class="font-display font-700 text-lg text-ink-700">No hay productos disponibles</h3>
+      <p class="text-ink-400 mt-1 text-sm">Intenta con otra categoría o término de búsqueda.</p>
+      <button @click="clearFilters()" class="btn-primary mt-5 inline-flex items-center gap-2">
+        <i class="fa-solid fa-rotate-left"></i> Ver todos los productos
+      </button>
+    </div>
+
+  </main>
+
+  {% include 'core/_footer.html' %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  var els = document.querySelectorAll('.hero-bg, .search-catalog, .cat-pill-catalog');
+  els.forEach(function(el, i) {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(14px)';
+    el.style.transition = 'opacity .45s cubic-bezier(.4,0,.2,1), transform .45s cubic-bezier(.4,0,.2,1)';
+    setTimeout(function() {
+      el.style.opacity = '1';
+      el.style.transform = 'translateY(0)';
+    }, 60 + i * 50);
+  });
+});
+</script>
+{% endblock %}

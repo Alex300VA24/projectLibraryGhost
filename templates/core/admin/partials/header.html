@@ -1,0 +1,32 @@
+  <main class="flex-1 flex flex-col overflow-hidden max-lg:pt-0">
+    <header class="admin-topbar h-16 lg:h-20 flex items-center px-4 lg:px-8 gap-4 lg:gap-6 flex-shrink-0" role="banner">
+      <button @click="sidebarMobileOpen = !sidebarMobileOpen" class="lg:hidden p-2 rounded-xl admin-topbar-btn text-white transition-colors" aria-label="Abrir menú">
+        <i class="fa-solid fa-bars text-xl"></i>
+      </button>
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-2xl admin-topbar-icon flex items-center justify-center">
+          <i :class="getPageIcon()" class="text-[#fadd00] text-lg"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h2 class="font-display font-800 text-white text-lg sm:text-2xl tracking-tight" x-text="getPageTitle()"></h2>
+          </div>
+          <p class="text-white/65 text-xs font-medium tracking-wide hidden sm:block">LIBRERIA GHOSTITERI - PANEL OPERATIVO</p>
+        </div>
+      </div>
+      <div class="ml-auto flex items-center gap-3 lg:gap-4">
+        <button @click="showModalNotificaciones = true; loadPedidos()" class="w-10 h-10 rounded-2xl admin-topbar-btn flex items-center justify-center text-white/80 hover:text-white transition-all relative hover:scale-110 active:scale-95" aria-label="Notificaciones">
+          <i class="fa-solid fa-bell text-lg" :class="pedidos.length > 0 ? 'bell-ring' : ''"></i>
+          <span x-show="pedidos.length > 0" class="absolute -top-1 -right-1 w-5 h-5 rounded-full text-[10px] font-bold flex items-center justify-center shadow-lg bg-accent-500 text-white border border-white/20" x-text="pedidos.length" aria-hidden="true"></span>
+        </button>
+        <div class="w-px h-8 bg-white/20 hidden sm:block" aria-hidden="true"></div>
+        
+        <div class="hidden sm:flex items-center gap-3 admin-user-pill rounded-2xl px-4 py-2">
+          <div class="w-9 h-9 rounded-2xl admin-avatar flex items-center justify-center text-sm font-bold" x-text="initial" aria-hidden="true"></div>
+          <div>
+            <p class="text-sm font-semibold text-white" x-text="currentUser.nombre"></p>
+            <span class="badge text-xs" :class="currentUser.rol === 'admin' ? 'bg-purple-100 text-purple-700' : 'bg-yellow-100 text-yellow-700'"><span x-text="currentUser.rol === 'admin' ? 'Administrador' : 'Empleado'"></span></span>
+          </div>
+        </div>
+      </div>
+    </header>

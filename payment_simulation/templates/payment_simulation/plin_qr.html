@@ -1,0 +1,156 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Plin QR - Libreria Ghostitzer{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'src/css/phone-sim.css' %}">
+
+<div class="sim-wrapper">
+<div class="phone-frame">
+    <div class="sim-statusbar" style="background:#00C853;">
+        <span class="sim-time">12:30</span>
+        <div class="sim-icons">
+            <svg viewBox="0 0 24 24"><path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3c-1.65-1.66-4.34-1.66-6 0zm-4-4l2 2c2.76-2.76 7.24-2.76 10 0l2-2C15.14 9.14 8.87 9.14 5 13z"/></svg>
+            <svg viewBox="0 0 24 24"><path d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4z"/></svg>
+        </div>
+    </div>
+
+    <div class="sim-header">
+        <div class="sim-back">
+            <a href="{% url 'payment_simulation:plin_with_order' order_id=order.id %}"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></a>
+        </div>
+        <span class="sim-title">Escanear QR</span>
+        <div class="sim-back"></div>
+    </div>
+
+    {% if success %}
+    <div class="sim-content" style="position:relative;">
+        <div class="sim-success-overlay">
+            <div class="sim-success-icon">✅</div>
+            <div class="sim-success-title">Pago exitoso</div>
+            <div class="sim-success-sub">Pedido N°{{ order.order_number|default:order.id }} pagado con Plin</div>
+            <a href="{% url 'payment_simulation:home' %}" class="sim-pay-btn plin" style="max-width:260px;text-decoration:none;">Volver al inicio</a>
+        </div>
+    </div>
+    {% else %}
+    <div class="sim-content">
+        <div class="sim-amount sim-plin"><span class="sim-cur">S/</span> {{ order.total|floatformat:2 }}</div>
+
+        <div class="sim-scan-area" id="scanArea">
+            <video id="qrVideo" autoplay playsinline style="display:none;"></video>
+            <div class="sim-scan-overlay" id="scanOverlay">
+                <div class="sim-scan-frame"></div>
+            </div>
+        </div>
+        <div class="sim-scan-label" id="scanLabel">Escanea el código QR para pagar con Plin</div>
+
+        <button onclick="startPlinCamera()" id="startCamBtn" class="sim-pay-btn plin-camera">INICIAR CÁMARA</button>
+
+        <input type="file" id="camFallback" accept="image/*" capture="environment" style="display:none;">
+
+        <form method="post" action="{% url 'payment_simulation:plin_qr' order_id=order.id %}" id="payForm" style="display:none;">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="pay">
+            <button type="submit" class="sim-pay-btn plin">PAGAR CON PLIN</button>
+        </form>
+    </div>
+    {% endif %}
+
+    <div class="sim-navbar">
+        <div class="sim-navbtn triangle"></div>
+        <div class="sim-navbtn circle"></div>
+        <div class="sim-navbtn"></div>
+    </div>
+</div>
+</div>
+
+<script>
+var plinStream = null;
+
+function startPlinCamera() {
+    var video = document.getElementById('qrVideo');
+    var btn = document.getElementById('startCamBtn');
+    var payForm = document.getElementById('payForm');
+    var fallbackInput = document.getElementById('camFallback');
+    if (!video) return;
+
+    var getUserMedia = (navigator.mediaDevices && navigator.mediaDevices.getUserMedia)
+        || navigator.webkitGetUserMedia
+        || navigator.mozGetUserMedia
+        || navigator.msGetUserMedia;
+
+    if (getUserMedia) {
+        var constraints = { video: { facingMode: { ideal: 'environment' } } };
+        var successCb = function(stream) {
+            plinStream = stream;
+            if (navigator.mediaDevices) {
+                video.srcObject = stream;
+            } else {
+                video.src = window.URL.createObjectURL(stream);
+            }
+            video.style.display = 'block';
+            if (btn) btn.style.display = 'none';
+            if (payForm) payForm.style.display = 'block';
+        };
+        var errorCb = function(err) {
+            console.log('Cámara no disponible:', err);
+            if (btn) {
+                if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+                    btn.textContent = 'PERMISO DENEGADO';
+                } else {
+                    useCameraFallback();
+                }
+            }
+        };
+        try {
+            if (typeof getUserMedia === 'function') {
+                getUserMedia.call(navigator, constraints, successCb, errorCb);
+            } else {
+                getUserMedia(constraints).then(successCb).catch(errorCb);
+            }
+        } catch(e) {
+            errorCb(e);
+        }
+    } else {
+        useCameraFallback();
+    }
+}
+
+function useCameraFallback() {
+    var btn = document.getElementById('startCamBtn');
+    var fallbackInput = document.getElementById('camFallback');
+    var scanLabel = document.getElementById('scanLabel');
+    if (fallbackInput) {
+        btn.style.display = 'none';
+        fallbackInput.style.display = 'block';
+        fallbackInput.style.width = '100%';
+        fallbackInput.style.padding = '18px';
+        fallbackInput.style.background = '#00C853';
+        fallbackInput.style.color = '#fff';
+        fallbackInput.style.border = 'none';
+        fallbackInput.style.borderRadius = '14px';
+        fallbackInput.style.fontSize = '16px';
+        fallbackInput.style.fontWeight = '700';
+        fallbackInput.style.cursor = 'pointer';
+        fallbackInput.style.textAlign = 'center';
+        fallbackInput.style.boxSizing = 'border-box';
+        fallbackInput.setAttribute('capture', 'environment');
+        fallbackInput.addEventListener('change', function() {
+            var payForm = document.getElementById('payForm');
+            fallbackInput.style.display = 'none';
+            if (scanLabel) scanLabel.textContent = 'Foto capturada. Presiona PAGAR CON PLIN para continuar.';
+            if (payForm) payForm.style.display = 'block';
+        });
+        fallbackInput.click();
+    }
+}
+
+window.addEventListener('beforeunload', function() {
+    if (plinStream) {
+        if (plinStream.stop) plinStream.stop();
+        plinStream.getTracks().forEach(function(t) { t.stop(); });
+    }
+});
+</script>
+{% endblock %}

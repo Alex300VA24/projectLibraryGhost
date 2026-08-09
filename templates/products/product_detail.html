@@ -1,0 +1,110 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}{{ product.name }} — Libreria Ghostitzer{% endblock %}
+
+{% block content %}
+<div x-data="productDetailApp({ addToCartUrl: '{% url "add_to_cart" %}' })">
+  {% include 'core/_navbar.html' %}
+
+  <main class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <nav class="breadcrumb mb-6">
+      <a href="{% url 'catalog' %}">Catálogo</a>
+      <span class="separator">/</span>
+      <a href="{% url 'catalog' %}?category={{ product.category.slug }}">{{ product.category.name }}</a>
+      <span class="separator">/</span>
+      <span class="text-ink-700 font-medium">{{ product.name }}</span>
+    </nav>
+
+    <div class="grid md:grid-cols-2 gap-10">
+      <div class="aspect-square bg-ink-50 rounded-2xl flex items-center justify-center border border-ink-100">
+        {% if product.image %}
+          <img src="{{ product.image.url }}" alt="{{ product.name }}" class="w-full h-full object-cover rounded-2xl">
+        {% else %}
+          <i class="fa-solid fa-box text-ink-300 text-8xl"></i>
+        {% endif %}
+      </div>
+
+      <div>
+        <span class="badge bg-brand-100 text-brand-700 mb-3">{{ product.category.name }}</span>
+        <h1 class="font-display font-800 text-3xl text-ink-900">{{ product.name }}</h1>
+
+        <div class="mt-4 flex items-baseline gap-2">
+          <span class="font-display font-800 text-3xl text-brand-600">S/ {{ product.price|floatformat:2 }}</span>
+          {% if total_stock > 0 %}
+            <span class="text-sm text-green-600 font-medium"><i class="fa-solid fa-circle-check"></i> En stock ({{ total_stock }} unid.)</span>
+          {% else %}
+            <span class="text-sm text-red-500 font-medium"><i class="fa-solid fa-circle-xmark"></i> Agotado</span>
+          {% endif %}
+        </div>
+
+        <p class="text-ink-600 mt-6 leading-relaxed">{{ product.description|default:"Sin descripción." }}</p>
+
+        {% if total_stock > 0 %}
+          <div class="mt-8 flex items-center gap-4">
+            <div class="flex items-center gap-2">
+              <button @click="qty = Math.max(1, qty - 1)" class="qty-btn"><i class="fa-solid fa-minus"></i></button>
+              <span class="w-10 text-center font-display font-700 text-lg" x-text="qty"></span>
+              <button @click="qty = Math.min({{ total_stock }}, qty + 1)" class="qty-btn"><i class="fa-solid fa-plus"></i></button>
+            </div>
+            <button type="button" class="btn-primary" @click="addToCart({{ product.id }})">
+              <i class="fa-solid fa-cart-plus"></i>
+              <span>Agregar al carrito</span>
+            </button>
+          </div>
+        {% endif %}
+
+      </div>
+    </div>
+
+    {% if related_products %}
+      <section class="mt-16">
+        <h2 class="font-display font-800 text-xl text-ink-900 mb-6">Productos relacionados</h2>
+        <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {% for related in related_products %}
+            <div class="prod-card-catalog stagger-in"
+                 style="transition-delay:{{ forloop.counter0|add:'50' }}ms">
+              <a href="{% url 'product_detail' slug=related.slug %}" class="block relative z-20">
+                <div class="aspect-square bg-ink-50 flex items-center justify-center">
+                  {% if related.image %}
+                    <img src="{{ related.image.url }}" alt="{{ related.name }}" class="w-full h-full object-cover">
+                  {% else %}
+                    <i class="fa-solid fa-box text-ink-300 text-4xl"></i>
+                  {% endif %}
+                </div>
+                <div class="p-4">
+                  <h3 class="font-display font-700 text-sm text-ink-900 line-clamp-2">{{ related.name }}</h3>
+                  <div class="flex items-center justify-between mt-2">
+                    <span class="font-display font-800 text-brand-600">S/ {{ related.price|floatformat:2 }}</span>
+                  </div>
+                </div>
+              </a>
+              <a href="{% url 'product_detail' slug=related.slug %}" class="view-detail-btn" title="Ver detalle">
+                <i class="fa-solid fa-arrow-right"></i>
+              </a>
+            </div>
+          {% endfor %}
+        </div>
+      </section>
+    {% endif %}
+  </main>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  var els = document.querySelectorAll('.stagger-in');
+  els.forEach(function(el, i) {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(20px) scale(.98)';
+    setTimeout(function() {
+      el.style.opacity = '1';
+      el.style.transform = 'translateY(0) scale(1)';
+    }, 100 + i * 50);
+  });
+});
+</script>
+{% endblock %}
+
+

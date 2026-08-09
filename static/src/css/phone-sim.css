@@ -1,0 +1,477 @@
+/* ============================================
+   Phone Simulation Shared Styles
+   Responsive, mobile-first, with hover effects
+   ============================================ */
+
+/* Phone Frame Wrapper */
+.sim-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 16px;
+  background: #f0f0f0;
+}
+
+/* Phone Frame */
+.phone-frame {
+  width: 375px;
+  height: 812px;
+  background: #fff;
+  border-radius: 40px;
+  overflow: hidden;
+  box-shadow: 0 25px 80px rgba(0,0,0,0.18), 0 4px 12px rgba(0,0,0,0.08);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+/* Status Bar */
+.sim-statusbar {
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+.sim-statusbar .sim-time { font-size: 15px; }
+.sim-statusbar .sim-icons { display: flex; gap: 5px; align-items: center; }
+.sim-statusbar .sim-icons svg { width: 18px; height: 18px; fill: #fff; }
+
+/* Header */
+.sim-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: #fff;
+  border-bottom: 1px solid #f0f0f0;
+  flex-shrink: 0;
+}
+.sim-header .sim-back {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  transition: background 0.2s;
+}
+.sim-header .sim-back:hover { background: #f5f5f5; }
+.sim-header .sim-back svg { width: 24px; height: 24px; stroke: #333; stroke-width: 2; fill: none; }
+.sim-header .sim-title { font-size: 18px; font-weight: 600; color: #1a1a1a; }
+
+/* Content Area */
+.sim-content {
+  flex: 1;
+  padding: 28px 20px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+/* Bottom Nav Bar */
+.sim-navbar {
+  height: 48px;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 60px;
+  flex-shrink: 0;
+}
+.sim-navbtn { width: 14px; height: 14px; background: #666; border-radius: 2px; }
+.sim-navbtn.circle { width: 16px; height: 16px; border-radius: 50%; }
+.sim-navbtn.triangle {
+  width: 0; height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-bottom: 14px solid #666;
+  background: transparent;
+  border-radius: 0;
+}
+
+/* ---- Brand Colors ---- */
+.sim-yape { color: #7B1FA2; }
+.sim-yape-bg { background: #7B1FA2; }
+.sim-yape-bg:hover { background: #6A1B9A; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(123,31,162,0.4); }
+.sim-plin { color: #00C853; }
+.sim-plin-bg { background: #00C853; }
+.sim-plin-bg:hover { background: #00A843; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(0,200,83,0.4); }
+
+/* ---- Amount Display ---- */
+.sim-amount {
+  font-size: 48px;
+  font-weight: 300;
+  margin-bottom: 6px;
+}
+.sim-amount .sim-cur {
+  font-size: 18px;
+  color: #bbb;
+}
+.sim-hint {
+  font-size: 13px;
+  color: #bbb;
+  margin-bottom: 28px;
+}
+
+/* ---- Menu Buttons ---- */
+.sim-menu-btn {
+  width: 100%;
+  padding: 18px 16px;
+  border-radius: 14px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  transition: all 0.25s ease;
+  border: none;
+  text-decoration: none;
+}
+.sim-menu-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
+.sim-menu-btn:active { transform: translateY(0); }
+
+.sim-menu-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+  transition: transform 0.2s;
+}
+.sim-menu-btn:hover .sim-menu-icon { transform: scale(1.05); }
+
+.sim-menu-text { text-align: left; }
+.sim-menu-text small {
+  display: block;
+  font-size: 11px;
+  font-weight: 400;
+  opacity: 0.7;
+  margin-top: 2px;
+}
+
+/* Menu button variants */
+.sim-menu-btn.code {
+  background: #f3e5f5;
+  color: #7B1FA2;
+  border: 2px solid #ce93d8;
+}
+.sim-menu-btn.code:hover { background: #e1bee7; border-color: #ba68c8; }
+
+.sim-menu-btn.pedidos {
+  background: #fff;
+  color: #555;
+  border: 2px solid #e0e0e0;
+}
+.sim-menu-btn.pedidos:hover { background: #f8f8f8; border-color: #bdbdbd; }
+
+.sim-menu-btn.qr-yape {
+  background: #7B1FA2;
+  color: #fff;
+}
+.sim-menu-btn.qr-yape:hover { background: #6A1B9A; }
+
+.sim-menu-btn.qr-plin {
+  background: #00C853;
+  color: #fff;
+}
+.sim-menu-btn.qr-plin:hover { background: #00A843; }
+
+/* ---- Pay Button ---- */
+.sim-pay-btn {
+  width: 100%;
+  height: 56px;
+  border: none;
+  border-radius: 14px;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 1px;
+  transition: all 0.25s ease;
+  position: relative;
+  overflow: hidden;
+}
+.sim-pay-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,0.15) 0%, transparent 60%);
+  pointer-events: none;
+}
+.sim-pay-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+}
+.sim-pay-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.sim-pay-btn.yape {
+  background: #7B1FA2;
+}
+.sim-pay-btn.yape:hover { background: #6A1B9A; }
+
+.sim-pay-btn.plin {
+  background: #00C853;
+}
+.sim-pay-btn.plin:hover { background: #00A843; }
+
+.sim-pay-btn.camera {
+  background: #9C27B0;
+}
+.sim-pay-btn.camera:hover { background: #7B1FA2; }
+
+.sim-pay-btn.plin-camera {
+  background: #00A843;
+}
+.sim-pay-btn.plin-camera:hover { background: #008C38; }
+
+/* ---- Back Text Button ---- */
+.sim-back-text {
+  display: inline-block;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 14px;
+  background: none;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+.sim-back-text:hover { opacity: 0.7; }
+
+/* ---- Order List ---- */
+.sim-order-list { width: 100%; text-align: left; }
+.sim-order-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+  border-radius: 12px;
+  margin-bottom: 10px;
+  text-decoration: none;
+  transition: all 0.25s ease;
+}
+.sim-order-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+}
+.sim-order-id { font-size: 15px; font-weight: 700; }
+.sim-order-code { font-size: 11px; color: #aaa; }
+.sim-order-total { font-size: 15px; font-weight: 700; color: #333; }
+
+/* Yape order variant */
+.sim-order-item.yape {
+  background: #f8f5ff;
+  border: 1px solid #e8dff5;
+}
+.sim-order-item.yape:hover { background: #f0e8ff; border-color: #c4a8e8; }
+.sim-order-item.yape .sim-order-id { color: #7B1FA2; }
+
+/* Plin order variant */
+.sim-order-item.plin {
+  background: #f0faf8;
+  border: 1px solid #d0ede8;
+}
+.sim-order-item.plin:hover { background: #e0f5f0; border-color: #a0d8cc; }
+.sim-order-item.plin .sim-order-id { color: #00C853; }
+
+/* ---- Code Box ---- */
+.sim-code-box {
+  border-radius: 14px;
+  padding: 24px 16px;
+  margin-bottom: 16px;
+}
+.sim-code-box .sim-label { font-size: 13px; color: #888; margin-bottom: 8px; }
+.sim-code-box .sim-code {
+  font-size: 48px;
+  font-weight: 700;
+  letter-spacing: 8px;
+  font-family: 'Courier New', monospace;
+}
+.sim-code-box .sim-sub { font-size: 11px; color: #aaa; margin-top: 8px; }
+
+/* ---- Code Input ---- */
+.sim-code-input {
+  width: 100%;
+  padding: 16px;
+  border: 2px solid #ddd;
+  border-radius: 12px;
+  font-size: 26px;
+  text-align: center;
+  letter-spacing: 10px;
+  font-family: 'Courier New', monospace;
+  outline: none;
+  margin-bottom: 14px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.sim-code-input:focus {
+  box-shadow: 0 0 0 3px rgba(123,31,162,0.15);
+}
+
+/* ---- Error Message ---- */
+.sim-error { color: #d32f2f; font-size: 13px; margin-bottom: 10px; }
+
+/* ---- Success Overlay ---- */
+.sim-success-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,0.97);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  border-radius: 40px;
+}
+.sim-success-icon { font-size: 70px; margin-bottom: 16px; }
+.sim-success-title { font-size: 22px; font-weight: 700; color: #333; margin-bottom: 8px; }
+.sim-success-sub { font-size: 14px; color: #999; margin-bottom: 30px; }
+
+/* ---- Scan Area (QR) ---- */
+.sim-scan-area {
+  width: 100%;
+  height: 260px;
+  background: #1a1a1a;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+  position: relative;
+  overflow: hidden;
+}
+.sim-scan-area video { width: 100%; height: 100%; object-fit: cover; }
+.sim-scan-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.sim-scan-frame {
+  width: 180px;
+  height: 180px;
+  border: 3px solid rgba(255,255,255,0.7);
+  border-radius: 14px;
+}
+.sim-scan-label { color: #666; font-size: 13px; margin-bottom: 14px; }
+
+/* ---- Empty State ---- */
+.sim-empty { color: #999; font-size: 14px; margin-top: 30px; }
+
+/* ---- Logo Emoji ---- */
+.sim-logo { font-size: 40px; margin-bottom: 4px; }
+.sim-title-brand { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+.sim-subtitle { font-size: 13px; color: #999; margin-bottom: 30px; }
+
+/* ============================================
+   RESPONSIVE: Mobile-first approach
+   On mobile: full-width, no phone frame
+   On desktop: centered phone mockup
+   ============================================ */
+
+@media (max-width: 480px) {
+  .sim-wrapper {
+    padding: 0;
+    background: #fff;
+    align-items: stretch;
+  }
+
+  .phone-frame {
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .sim-success-overlay {
+    border-radius: 0;
+  }
+
+  .sim-statusbar {
+    padding: 0 16px;
+  }
+
+  .sim-content {
+    padding: 20px 16px;
+  }
+
+  .sim-amount {
+    font-size: 40px;
+  }
+
+  .sim-code-box .sim-code {
+    font-size: 36px;
+    letter-spacing: 6px;
+  }
+
+  .sim-code-input {
+    font-size: 22px;
+    letter-spacing: 6px;
+  }
+
+  .sim-scan-area {
+    height: 220px;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+  .phone-frame {
+    width: 360px;
+    height: 740px;
+    border-radius: 32px;
+  }
+}
+
+/* Tablet and up: keep phone centered */
+@media (min-width: 769px) {
+  .sim-wrapper {
+    background: linear-gradient(135deg, #e8e8e8 0%, #d0d0d0 100%);
+  }
+}
+
+/* Touch-friendly: larger tap targets on mobile */
+@media (hover: none) and (pointer: coarse) {
+  .sim-menu-btn {
+    min-height: 56px;
+  }
+  .sim-pay-btn {
+    min-height: 52px;
+  }
+  .sim-order-item {
+    min-height: 52px;
+  }
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .sim-menu-btn,
+  .sim-pay-btn,
+  .sim-order-item,
+  .sim-menu-icon,
+  .sim-header .sim-back {
+    transition: none;
+  }
+  .sim-menu-btn:hover,
+  .sim-pay-btn:hover,
+  .sim-order-item:hover {
+    transform: none;
+  }
+}

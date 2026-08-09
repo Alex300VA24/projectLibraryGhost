@@ -1,0 +1,104 @@
+<!-- MODAL: Preparación de Pedido -->
+<div x-show="showModalPrepararPedido" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-bg" @click.self="showModalPrepararPedido = false" @keydown.escape.window="showModalPrepararPedido = false" role="dialog" aria-modal="true" aria-labelledby="modal-preparacion-pedido" style="display:none">
+  <div class="bg-white rounded-2xl shadow-xl w-full max-w-xl max-h-[85vh] overflow-y-auto" @click.stop>
+    <div class="flex items-center justify-between p-4 border-b border-ink-100">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-brand-100 flex items-center justify-center"><i class="fa-solid fa-truck-fast text-brand-600"></i></div>
+        <div>
+          <h3 id="modal-preparacion-pedido" class="text-2xl font-display font-700 text-ink-900">Preparación de Pedido</h3>
+          <p class="text-xs text-ink-400" x-text="'#' + (pedidoPreparar?.boleta_code || 'PED-' + (pedidoPreparar?.id || ''))"></p>
+        </div>
+      </div>
+      <button @click="showModalPrepararPedido = false" class="w-8 h-8 rounded-lg hover:bg-ink-100 flex items-center justify-center text-ink-400" aria-label="Cerrar modal"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="p-5 space-y-5" x-show="pedidoPreparar">
+      <!-- Order Info -->
+      <div class="grid grid-cols-2 gap-4">
+        <div class="bg-ink-50 rounded-xl p-3">
+          <p class="text-xs text-ink-400 mb-1">Código</p>
+          <p class="font-mono font-medium text-ink-800 text-sm" x-text="'#PED-' + pedidoPreparar.id"></p>
+        </div>
+        <div class="bg-ink-50 rounded-xl p-3">
+          <p class="text-xs text-ink-400 mb-1">Cliente</p>
+          <p class="font-medium text-ink-800 text-sm" x-text="pedidoPreparar.cliente"></p>
+        </div>
+        <div class="bg-ink-50 rounded-xl p-3">
+          <p class="text-xs text-ink-400 mb-1">Fecha</p>
+          <p class="text-ink-800 text-sm" x-text="pedidoPreparar.fecha"></p>
+        </div>
+        <div class="bg-ink-50 rounded-xl p-3">
+          <p class="text-xs text-ink-400 mb-1">Método de pago</p>
+          <span class="badge" :class="paymentBadgeClass(pedidoPreparar.metodo_key || pedidoPreparar.metodo_pago, pedidoPreparar.transfer_bank)"><i :class="(pedidoPreparar.metodo_key || pedidoPreparar.metodo_pago) === 'Yape' ? 'fa-solid fa-mobile-screen-button' : (pedidoPreparar.metodo_key || pedidoPreparar.metodo_pago) === 'Plin' ? 'fa-solid fa-wallet' : (pedidoPreparar.metodo_key || pedidoPreparar.metodo_pago) === 'Transferencia' ? 'fa-solid fa-university' : 'fa-solid fa-money-bill-wave'"></i> <span x-text="paymentLabel(pedidoPreparar.metodo_key || pedidoPreparar.metodo_pago, pedidoPreparar.transfer_bank) || 'No especificado'"></span></span>
+        </div>
+      </div>
+      <div class="bg-ink-50 rounded-xl p-3">
+        <p class="text-xs text-ink-400 mb-1">Dirección</p>
+        <p class="text-ink-800 text-sm" x-text="pedidoPreparar.direccion || 'Retiro en tienda'"></p>
+      </div>
+      <div>
+        <p class="text-xs text-ink-400 mb-1">Estado</p>
+        <span class="badge text-sm px-3 py-1" :class="adminOrderBadgeClass(pedidoPreparar.estado)"><i :class="statusIcon(pedidoPreparar.estado)"></i> <span x-text="pedidoPreparar.estado"></span></span>
+      </div>
+
+      <!-- Products -->
+      <div>
+        <h4 class="font-display font-600 text-ink-800 text-sm mb-3">Productos</h4>
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead>
+              <tr class="text-left text-xs text-ink-400 uppercase tracking-wider border-b border-ink-100">
+                <th class="pb-2 font-medium">Producto</th>
+                <th class="pb-2 font-medium text-center">Cant</th>
+                <th class="pb-2 font-medium text-right">Precio</th>
+                <th class="pb-2 font-medium text-right">Subtotal</th>
+              </tr>
+            </thead>
+            <tbody>
+              <template x-for="item in pedidoPreparar.items" :key="item.name">
+                <tr class="border-b border-ink-50">
+                  <td class="py-2">
+                    <div class="flex items-center gap-3">
+                      <template x-if="item.image">
+                        <img :src="item.image" alt="Imagen" class="w-10 h-10 rounded-xl object-cover bg-white border border-ink-100">
+                      </template>
+                      <template x-if="!item.image">
+                        <div class="w-10 h-10 rounded-xl bg-ink-100 flex items-center justify-center text-ink-400"><i class="fa-solid fa-box"></i></div>
+                      </template>
+                      <p class="text-ink-800 text-sm truncate" x-text="item.name"></p>
+                    </div>
+                  </td>
+                  <td class="py-2 text-center text-ink-600 text-sm" x-text="item.quantity"></td>
+                  <td class="py-2 text-right text-ink-600 text-sm" x-text="'S/ ' + item.price.toFixed(2)"></td>
+                  <td class="py-2 text-right font-medium text-ink-800 text-sm" x-text="'S/ ' + item.subtotal.toFixed(2)"></td>
+                </tr>
+              </template>
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="3" class="pt-3 text-right font-display font-600 text-ink-600 text-sm">Total</td>
+                <td class="pt-3 text-right font-display font-700 text-ink-900 text-lg" x-text="'S/ ' + pedidoPreparar.total.toFixed(2)"></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+
+      <!-- Notes -->
+    <div x-show="pedidoPreparar.notes" class="bg-sky-50 rounded-xl p-3 border border-sky-200">
+      <p class="text-xs text-sky-600 font-medium mb-1"><i class="fa-solid fa-note-sticky mr-1"></i> Observaciones</p>
+      <p class="text-sky-800 text-sm" x-text="pedidoPreparar.notes"></p>
+      </div>
+
+      <!-- Buttons -->
+      <div class="flex gap-3 pt-2 border-t border-ink-100">
+        <button @click="showModalPrepararPedido = false" class="btn-ghost flex-1 aria-label="Cerrar modal">
+          Cerrar
+        </button>
+        <button x-show="pedidoPreparar.estado_key === 'pending'" @click="marcarListoEntrega(pedidoPreparar)" class="btn-primary flex-1 py-2.5 text-sm" :disabled="showLoadingOverlay">
+          <i class="fa-solid fa-check-circle mr-1"></i>
+          <span x-text="showLoadingOverlay ? 'Procesando...' : 'Listo para entregar'"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

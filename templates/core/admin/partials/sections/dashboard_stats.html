@@ -1,0 +1,144 @@
+      <!-- DASHBOARD -->
+      <div x-show="adminSection === 'dashboard' && isAdmin" class="dashboard-surface space-y-4">
+
+        <div class="grid grid-cols-2 xl:grid-cols-4 gap-3">
+          <div class="dashboard-metric-card fade-up p-3 min-h-[9.5rem] flex flex-col justify-between">
+            <div class="flex items-start justify-between gap-2">
+              <div class="space-y-1 min-w-0">
+                <p class="text-[10px] font-semibold uppercase tracking-[0.15em] text-ink-500">Ganancia hoy</p>
+                <div class="text-xl font-display font-800 text-ink-900" x-text="'S/ ' + ((dashboardData.gananciaHoy || 0)).toFixed(2)"></div>
+              </div>
+              <div class="w-10 h-10 rounded-xl flex items-center justify-center text-white shrink-0" style="background:linear-gradient(135deg,#4c5bd0,#8ba3ff);">
+                <i class="fa-solid fa-coins text-sm"></i>
+              </div>
+            </div>
+            <p class="text-xs text-ink-500">Rendimiento del día</p>
+          </div>
+          <div class="dashboard-metric-card fade-up-d1 p-3 min-h-[9.5rem] flex flex-col justify-between">
+            <div class="flex items-start justify-between gap-2">
+              <div class="space-y-1 min-w-0">
+                <p class="text-[10px] font-semibold uppercase tracking-[0.15em] text-ink-500">Ganancia semana</p>
+                <div class="text-xl font-display font-800 text-ink-900" x-text="'S/ ' + ((dashboardData.gananciaSemana || 0)).toFixed(2)"></div>
+              </div>
+              <div class="w-10 h-10 rounded-xl flex items-center justify-center text-white shrink-0" style="background:linear-gradient(135deg,#f59e0b,#fbbf24);">
+                <i class="fa-solid fa-chart-line text-sm"></i>
+              </div>
+            </div>
+            <p class="text-xs text-ink-500">Rendimiento de la semana</p>
+          </div>
+          <div class="dashboard-metric-card fade-up-d2 p-3 min-h-[9.5rem] flex flex-col justify-between">
+            <div class="flex items-start justify-between gap-2">
+              <div class="space-y-1 min-w-0">
+                <p class="text-[10px] font-semibold uppercase tracking-[0.15em] text-ink-500">Ganancia mes</p>
+                <div class="text-xl font-display font-800 text-accent-600" x-text="'S/ ' + ((dashboardData.gananciaMes || 0)).toFixed(2)"></div>
+              </div>
+              <div class="w-10 h-10 rounded-xl flex items-center justify-center text-white shrink-0" style="background:linear-gradient(135deg,#dc2626,#fb7185);">
+                <i class="fa-solid fa-wallet text-sm"></i>
+              </div>
+            </div>
+            <p class="text-xs text-ink-500">Rendimiento del mes</p>
+          </div>
+          <div class="dashboard-metric-card fade-up-d3 p-3 min-h-[9.5rem] flex flex-col justify-between">
+            <div class="flex items-start justify-between gap-2">
+              <div class="space-y-1 min-w-0">
+                <p class="text-[10px] font-semibold uppercase tracking-[0.15em] text-ink-500">Pedidos pendientes</p>
+                <div class="text-2xl font-display font-800 text-ink-900" x-text="dashboardData.pedidosPendientes"></div>
+              </div>
+              <div class="w-10 h-10 rounded-xl flex items-center justify-center text-white shrink-0" style="background:linear-gradient(135deg,#16a34a,#4ade80);">
+                <i class="fa-solid fa-box-open text-sm"></i>
+              </div>
+            </div>
+            <p class="text-xs text-ink-500">Pendientes por atender</p>
+          </div>
+        </div>
+
+        <div class="grid lg:grid-cols-3 gap-6">
+          <div class="lg:col-span-2 dashboard-panel overflow-hidden fade-up-d1">
+            <div class="px-6 py-5 border-b border-ink-200/60 flex items-center justify-between gap-3">
+              <div>
+                <h3 class="font-display font-700 text-ink-900 shrink-0">Ventas de la semana</h3>
+                <p class="dashboard-panel-muted text-xs mt-1">El pulso comercial día por día con foco en el rendimiento actual.</p>
+              </div>
+              <div class="flex items-center gap-2">
+                <button @click="navegarSemana(-1)" class="dashboard-nav-button flex items-center justify-center" title="Semana anterior"><i class="fa-solid fa-chevron-left text-xs"></i></button>
+                <span class="text-xs text-ink-600 font-medium min-w-[13rem] text-center select-none" x-text="'Semana del ' + (dashboardData.weekStart || '') + ' al ' + (dashboardData.weekEnd || '')"></span>
+                <button @click="navegarSemana(1)" class="dashboard-nav-button flex items-center justify-center" title="Semana siguiente"><i class="fa-solid fa-chevron-right text-xs"></i></button>
+              </div>
+            </div>
+            <div class="p-6">
+              <div class="relative h-56">
+                <template x-for="(day, idx) in chartData" :key="idx">
+                  <div class="absolute bottom-0 flex flex-col items-center" :style="'left:' + (idx * 14.28) + '%; width:14.28%'">
+                    <span class="text-xs text-ink-600 font-semibold mb-1" x-text="day.cantidad + ' ventas'"></span>
+                    <span class="text-xs font-bold mb-2" :class="day.isToday ? 'text-accent-600' : 'text-brand-700'" x-text="'S/ ' + day.ventas.toFixed(2)"></span>
+                    <div class="dashboard-chart-bar transition-all duration-500" :class="day.isToday ? 'is-today' : ''" :style="'height:' + (day.ventas > 0 ? Math.max(day.ventas / maxChartVenta * 128, 10) : 6) + 'px'"></div>
+                    <span class="text-xs text-ink-500 mt-2 leading-tight text-center" x-text="day.label + ' ' + day.fecha"></span>
+                  </div>
+                </template>
+              </div>
+            </div>
+          </div>
+
+          <div class="dashboard-panel overflow-hidden fade-up-d2">
+            <div class="px-6 py-5 border-b border-ink-200/60">
+              <h3 class="font-display font-700 text-ink-900">Productos más vendidos</h3>
+              <p class="dashboard-panel-muted text-xs mt-1">Lo que más rota y genera ingreso.</p>
+            </div>
+            <div class="divide-y divide-ink-200/50">
+              <template x-for="(prod, idx) in topProductos" :key="idx">
+                <div class="dashboard-ranking-row flex items-center gap-3 px-5 py-3.5">
+                  <div class="dashboard-rank-badge"
+                    :class="idx === 0 ? 'text-[#422600]' : idx === 1 ? 'text-brand-700' : 'text-ink-700'"
+                    :style="idx === 0 ? 'background:rgba(250,221,0,.35)' : idx === 1 ? 'background:rgba(88,98,200,.16)' : 'background:rgba(122,70,61,.10)'"
+                    x-text="idx + 1"></div>
+                  <div class="w-10 h-10 rounded-xl overflow-hidden bg-ink-100 flex-shrink-0 flex items-center justify-center">
+                    <template x-if="prod.imagen">
+                      <img :src="prod.imagen" :alt="prod.nombre" class="w-full h-full object-cover">
+                    </template>
+                    <template x-if="!prod.imagen">
+                      <i class="fa-solid fa-box text-ink-300 text-sm"></i>
+                    </template>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <p class="text-sm font-semibold text-ink-800 truncate" x-text="prod.nombre"></p>
+                    <p class="text-xs text-ink-500" x-text="prod.vendidos + ' unidades'"></p>
+                  </div>
+                  <span class="text-sm font-display font-700 text-ink-900" x-text="'S/ ' + prod.ingreso.toFixed(2)"></span>
+                </div>
+              </template>
+            </div>
+          </div>
+        </div>
+
+        <div class="dashboard-panel dashboard-table-card overflow-hidden fade-up-d3">
+          <div class="px-6 py-5 border-b border-ink-200/60 flex items-center justify-between gap-3">
+            <div>
+              <h3 class="font-display font-700 text-ink-900">Últimas ventas</h3>
+              <p class="dashboard-panel-muted text-xs mt-1">Consulta rápida de movimientos recientes y su estado.</p>
+            </div>
+            <button @click="navigateTo('lista-ventas')" class="text-brand-700 text-xs font-semibold hover:text-brand-600 transition-all hover:translate-x-1"><i class="fa-solid fa-arrow-right text-xs ml-1"></i> Ver todo</button>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <thead><tr class="tbl-head"><th class="text-left">Boleta</th><th class="text-left">Cliente</th><th class="text-left">Canal</th><th class="text-left">Total</th><th class="text-left">Estado</th><th class="text-left">Fecha</th></tr></thead>
+              <tbody>
+                <template x-for="venta in ventas.slice(0, 5)" :key="venta.id">
+                  <tr class="tbl-row cursor-pointer" @click="verVenta(venta)">
+                    <td class="font-mono text-xs text-ink-500" x-text="venta.boleta_code || '#V-' + venta.id"></td>
+                    <td class="font-medium text-ink-800" x-text="venta.cliente"></td>
+                    <td>
+                      <span class="badge channel-badge" :class="venta.canal === 'Online' ? 'channel-online' : 'channel-local'">
+                        <span class="cb-icon" style="display:none"><i :class="venta.canal === 'Online' ? 'fa-solid fa-globe' : 'fa-solid fa-store'"></i> </span>
+                        <span x-text="venta.canal"></span>
+                      </span>
+                    </td>
+                    <td class="font-display font-700 text-ink-900" x-text="'S/ ' + venta.total.toFixed(2)"></td>
+                    <td><span class="badge" :class="adminVentaBadgeClass(venta.estado)"><span class="cb-icon" style="display:none"><i :class="statusIcon(venta.estado)"></i> </span><span x-text="venta.estado"></span></span></td>
+                    <td class="text-ink-500 text-xs" x-text="venta.fecha"></td>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>

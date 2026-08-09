@@ -1,0 +1,149 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Ghostitzer — Contacto{% endblock %}
+
+{% block content %}
+<div class="bg-ink-50 min-h-screen" x-data="contactApp()">
+
+  {% include 'core/_navbar.html' %}
+
+  <!-- HEADER -->
+  <section class="hero-bg py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <p class="text-[#ffb238] font-display font-800 text-2xl uppercase tracking-widest mb-2">Soporte</p>
+      <h1 class="font-display text-4xl md:text-5xl font-800 text-white mb-4">Contacto</h1>
+      <p class="text-blue-100 text-lg max-w-2xl mx-auto">¿Tienes alguna duda o sugerencia? Estamos aquí para ayudarte</p>
+    </div>
+  </section>
+
+  <!-- CONTACT CONTENT -->
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="grid md:grid-cols-2 gap-12">
+      <div>
+        <h2 class="font-display font-700 text-ink-900 text-2xl mb-6">Envíanos un mensaje</h2>
+        <template x-if="!sent">
+          <div class="space-y-5">
+            <div class="bg-blue-50 border border-blue-200 rounded-xl p-3 flex items-start gap-2">
+              <i class="fa-solid fa-circle-info text-blue-500 mt-0.5"></i>
+              <p class="text-sm text-blue-700">Los campos marcados con <span class="text-red-500 font-semibold">*</span> son obligatorios</p>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-semibold text-ink-500 uppercase tracking-wide mb-1.5 required-field">Nombre</label>
+                <input class="inp" x-model="form.nombre" placeholder="Tu nombre" :class="form.nombre ? 'input-success' : ''"/>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-ink-500 uppercase tracking-wide mb-1.5 required-field">Apellido</label>
+                <input class="inp" x-model="form.apellido" placeholder="Tu apellido" :class="form.apellido ? 'input-success' : ''"/>
+              </div>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-ink-500 uppercase tracking-wide mb-1.5 required-field">Correo electrónico</label>
+              <input class="inp" type="email" x-model="form.email" placeholder="correo@ejemplo.com" :class="form.email && !form.email.includes('@') ? 'input-error' : form.email.includes('@') ? 'input-success' : ''"/>
+              <p x-show="form.email && !form.email.includes('@')" class="field-error"><i class="fa-solid fa-circle-exclamation"></i> Ingresa un correo válido</p>
+              <p class="text-xs text-ink-400 mt-1"><i class="fa-solid fa-shield-halved mr-1"></i> No compartiremos tu correo con terceros</p>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-ink-500 uppercase tracking-wide mb-1.5 required-field">Asunto</label>
+              <select class="inp" x-model="form.asunto">
+                <option value="">Selecciona un asunto</option>
+                <option>Duda sobre un producto</option>
+                <option>Estado de mi pedido</option>
+                <option>Problema con mi pedido</option>
+                <option>Sugerencia</option>
+                <option>Otro</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-ink-500 uppercase tracking-wide mb-1.5 required-field">Mensaje</label>
+              <textarea class="inp" rows="5" x-model="form.mensaje" placeholder="Describe tu consulta o sugerencia..." :class="form.mensaje && form.mensaje.length < 10 ? 'input-error' : form.mensaje.length >= 10 ? 'input-success' : ''"></textarea>
+              <div class="flex justify-between mt-1">
+                <p x-show="form.mensaje && form.mensaje.length < 10" class="field-error"><i class="fa-solid fa-circle-exclamation"></i> Mínimo 10 caracteres</p>
+                <p class="text-xs text-ink-400 ml-auto" x-text="form.mensaje.length + '/500'"></p>
+              </div>
+            </div>
+            <button @click="enviarMensaje()" class="btn-primary py-3 px-8 text-base" :disabled="!form.nombre || !form.email || !form.asunto || !form.mensaje || form.mensaje.length < 10">
+              <i class="fa-solid fa-paper-plane"></i> Enviar mensaje
+            </button>
+          </div>
+        </template>
+        <template x-if="sent">
+          <div class="bg-green-50 border border-green-200 rounded-2xl p-8 text-center">
+            <div class="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
+              <i class="fa-solid fa-check text-green-600 text-3xl"></i>
+            </div>
+            <h3 class="font-display font-700 text-ink-900 text-xl mb-2">¡Mensaje enviado!</h3>
+            <p class="text-ink-500 mb-2">Hemos recibido tu mensaje correctamente.</p>
+            <p class="text-sm text-ink-400">Te responderemos a <span class="font-semibold text-ink-600" x-text="form.email"></span> en menos de 24 horas.</p>
+            <button @click="resetForm()" class="btn-ghost mt-4"><i class="fa-solid fa-rotate-left mr-1"></i> Enviar otro mensaje</button>
+          </div>
+        </template>
+      </div>
+
+      <div class="space-y-8">
+        <div>
+          <h2 class="font-display font-700 text-ink-900 text-2xl mb-6">Información de contacto</h2>
+          <div class="space-y-5 pointer-events-none">
+            <div class="flex items-start gap-4 prod-card-catalog p-4 rounded-2xl">
+              <div class="w-12 h-12 rounded-xl bg-brand-100 flex items-center justify-center flex-shrink-0">
+                <i class="fa-solid fa-location-dot text-brand-600 text-lg"></i>
+              </div>
+              <div>
+                <p class="font-semibold text-ink-900">Dirección</p>
+                <p class="text-sm text-ink-500">Calle Principal, Trujillo<br/>La Libertad, Perú</p>
+              </div>
+            </div>
+            <div class="flex items-start gap-4 prod-card-catalog p-4 rounded-2xl">
+              <div class="w-12 h-12 rounded-xl bg-accent-100 flex items-center justify-center flex-shrink-0">
+                <i class="fa-solid fa-phone text-accent-600 text-lg"></i>
+              </div>
+              <div>
+                <p class="font-semibold text-ink-900">Teléfono</p>
+                <p class="text-sm text-ink-500">+51 123 456 789</p>
+                <p class="text-xs text-ink-400 mt-1">Lunes a sábado: 9am - 8pm</p>
+              </div>
+            </div>
+            <div class="flex items-start gap-4 prod-card-catalog p-4 rounded-2xl">
+              <div class="w-12 h-12 rounded-xl bg-green-100 flex items-center justify-center flex-shrink-0">
+                <i class="fa-solid fa-envelope text-green-600 text-lg"></i>
+              </div>
+              <div>
+                <p class="font-semibold text-ink-900">Correo electrónico</p>
+                <p class="text-sm text-ink-500">contacto@ghostitzerlibrary.com</p>
+                <p class="text-xs text-ink-400 mt-1">Respuesta en menos de 24 horas</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-ink-100 rounded-2xl h-64 flex items-center justify-center">
+          <div class="text-center text-ink-400">
+            <iframe src="https://www.google.com/maps/embed?pb=!4v1784506483778!6m8!1m7!1s_6GTwmw5gFKk_3VSXb8sjQ!2m2!1d-8.099984427056354!2d-79.01511216405117!3f283.89!4f-2.4200000000000017!5f0.7820865974627469" width="600" height="280" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {% include 'core/_footer.html' %}
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  var h = document.querySelectorAll('.hero-bg');
+  h.forEach(function(el, i) {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(14px)';
+    el.style.transition = 'opacity .45s cubic-bezier(.4,0,.2,1), transform .45s cubic-bezier(.4,0,.2,1)';
+    setTimeout(function() {
+      el.style.opacity = '1';
+      el.style.transform = 'translateY(0)';
+    }, 60 + i * 50);
+  });
+});
+</script>
+{% endblock %}

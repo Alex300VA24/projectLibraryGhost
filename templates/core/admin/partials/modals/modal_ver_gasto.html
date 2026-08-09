@@ -1,0 +1,38 @@
+<div x-show="showModalVerGasto" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-bg" @click.self="showModalVerGasto = false" @keydown.escape.window="showModalVerGasto = false" role="dialog" aria-modal="true" aria-labelledby="modal-detalle-gasto" style="display:none">
+  <div class="bg-white rounded-2xl shadow-xl w-full max-w-md" @click.stop>
+    <div class="flex items-center justify-between p-5 border-b border-ink-100">
+      <h3 id="modal-detalle-gasto" class="text-2xl font-display font-700 text-ink-900">Detalle del Gasto</h3>
+      <button @click="showModalVerGasto = false" class="w-8 h-8 rounded-lg hover:bg-ink-100 flex items-center justify-center text-ink-400" aria-label="Cerrar modal"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="p-5 space-y-4" x-show="gastoVer">
+      <div class="grid grid-cols-2 gap-3">
+        <div class="bg-ink-50 rounded-xl p-3"><p class="text-xs text-ink-400 mb-1">ID</p><p class="font-mono text-sm text-ink-800 font-semibold" x-text="'GAS-' + String(gastoVer?.id || '').padStart(4, '0')"></p></div>
+        <div class="bg-ink-50 rounded-xl p-3"><p class="text-xs text-ink-400 mb-1">Tipo</p><span class="badge" :class="gastoVer?.tipo === 'Fijo' ? 'bg-blue-100 text-blue-700' : 'bg-sky-100 text-sky-700'" x-text="gastoVer?.tipo"></span></div>
+        <div class="col-span-2 bg-ink-50 rounded-xl p-3"><p class="text-xs text-ink-400 mb-1">Concepto</p><p class="font-medium text-ink-800 text-sm" x-text="gastoVer?.concepto"></p></div>
+        <div class="bg-ink-50 rounded-xl p-3"><p class="text-xs text-ink-400 mb-1">Monto</p><p class="font-display font-700 text-ink-900" x-text="'S/ ' + (gastoVer?.monto || 0).toFixed(2)"></p></div>
+        <div class="bg-ink-50 rounded-xl p-3"><p class="text-xs text-ink-400 mb-1">Fecha</p><p class="text-ink-800 text-sm" x-text="gastoVer?.fecha"></p></div>
+      </div>
+      <template x-if="gastoVer?.comprobante_url">
+        <div class="bg-ink-50 rounded-xl p-3">
+          <p class="text-xs text-ink-400 mb-1">Comprobante</p>
+          <a :href="gastoVer.comprobante_url" target="_blank" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl bg-white border border-ink-200 hover:border-brand-400 hover:bg-brand-50 transition-colors cursor-pointer">
+            <div class="w-10 h-10 rounded-lg bg-brand-100 flex items-center justify-center flex-shrink-0">
+              <i class="fa-solid" :class="gastoVer.comprobante_url.match(/\.pdf$/i) ? 'fa-file-pdf text-brand-600' : 'fa-file-image text-brand-600'"></i>
+            </div>
+            <div class="flex-1 min-w-0 text-left">
+              <p class="text-sm font-medium text-ink-800 truncate" x-text="gastoVer.comprobante_nombre || 'Comprobante'"></p>
+              <p class="text-xs text-ink-400">Click para abrir</p>
+            </div>
+            <i class="fa-solid fa-external-link-alt text-ink-400"></i>
+          </a>
+        </div>
+      </template>
+      <template x-if="!gastoVer?.comprobante_url">
+        <div class="bg-ink-50 rounded-xl p-3 text-center text-ink-400 text-sm">
+          <i class="fa-solid fa-receipt text-lg mb-1 block"></i>
+          Sin comprobante adjunto
+        </div>
+      </template>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,23 @@
+{
+  "name": "library-ghostitzer",
+  "private": true,
+  "scripts": {
+    "build": "npm run build:css && npm run build:js",
+    "build:css": "tailwindcss -i ./static/src/css/app.css -o ./static/dist/css/app.css --minify",
+    "build:js": "esbuild ./static/src/js/app.js --bundle --outfile=./static/dist/js/app.js --minify",
+    "dev": "pnpm run build:css -- --watch",
+    "dev:js": "pnpm run build:js -- --watch"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.21",
+    "esbuild": "^0.25.5",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.17"
+  },
+  "dependencies": {
+    "@alpinejs/collapse": "^3.15.12",
+    "@fortawesome/fontawesome-free": "^7.3.0",
+    "alpinejs": "^3.14.9",
+    "sweetalert2": "^11.26.25"
+  }
+}

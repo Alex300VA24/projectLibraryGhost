@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>{% block email_title %}Libreria Ghostitzer{% endblock %}</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f3f4f6;font-family:'Segoe UI','Helvetica Neue',Arial,sans-serif;">
+  <table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;background-color:#f3f4f6;padding:20px 0;">
+    <tr>
+      <td align="center">
+        <table role="presentation" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background-color:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.08);">
+          <!-- HEADER -->
+          <tr>
+            <td style="background: linear-gradient(135deg, #1e3a5f 0%, #2a4f7f 100%);padding:32px 24px;">
+              <div style="text-align:center;">
+                <img src="cid:logo" alt="{{ company_name }}" style="display:block;margin:0 auto;width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,0.15);padding:8px;">
+              </div>
+              <h1 style="margin:12px 0 0;color:#ffffff;font-size:24px;font-weight:700;letter-spacing:-0.5px;text-align:center;">{{ company_name }}</h1>
+              <p style="margin:4px 0 0;color:rgba(255,255,255,0.7);font-size:14px;text-align:center;">Tu tienda de confianza</p>
+            </td>
+          </tr>
+          <!-- CONTENT -->
+          <tr>
+            <td style="padding:32px 24px;">
+              {% block content %}{% endblock %}
+            </td>
+          </tr>
+          <!-- FOOTER -->
+          <tr>
+            <td style="background-color:#f9fafb;padding:24px;text-align:center;border-top:1px solid #e5e7eb;">
+              <p style="margin:0 0 8px;color:#6b7280;font-size:13px;">{{ company_name }}</p>
+              {% if company_email %}
+              <p style="margin:0 0 4px;color:#6b7280;font-size:13px;">{{ company_email }}</p>
+              {% endif %}
+              <p style="margin:0;color:#9ca3af;font-size:11px;">© {% now "Y" %} {{ company_name }}. Todos los derechos reservados.</p>
+              <p style="margin:8px 0 0;color:#9ca3af;font-size:11px;">Este es un correo automático, por favor no respondas a este mensaje.</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

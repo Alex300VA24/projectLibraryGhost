@@ -1,0 +1,181 @@
+{% extends 'core/base.html' %}
+{% load static%}
+
+{% block title %}Dashboard - Libreria Ghostitzer{% endblock %}
+
+{% block content %}
+<style>
+  /* ===== SCROLLBAR: oculta por defecto, aparece al hacer scroll ===== */
+  .scrollbar-auto {
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+  }
+  .scrollbar-auto:hover { scrollbar-color: #cbd5e1 transparent; }
+  .scrollbar-auto::-webkit-scrollbar { width: 6px; }
+  .scrollbar-auto::-webkit-scrollbar-track { background: transparent; }
+  .scrollbar-auto::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 99px;
+    transition: background 0.3s;
+  }
+  .scrollbar-auto:hover::-webkit-scrollbar-thumb,
+  .scrollbar-auto:active::-webkit-scrollbar-thumb { background: #cbd5e1; }
+  .scrollbar-auto::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+  /* Sidebar nav sin scrollbar visible */
+  #sidebar nav { scrollbar-width: none; }
+  #sidebar nav::-webkit-scrollbar { display: none; }
+
+  /* Modales internos — scrollbar delgada */
+  .modal-inner-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: #e2e8f0 transparent;
+  }
+  .modal-inner-scroll::-webkit-scrollbar { width: 4px; }
+  .modal-inner-scroll::-webkit-scrollbar-track { background: transparent; }
+  .modal-inner-scroll::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 99px; }
+
+  /* ===== TRANSICIONES Y EFECTOS CONSISTENTES ===== */
+  /* Secciones: animación suave al cambiar */
+  .fade-up { animation: ym-fadeUp 0.32s cubic-bezier(0.4,0,0.2,1) both; }
+  .fade-up-d1 { animation: ym-fadeUp 0.32s 0.06s cubic-bezier(0.4,0,0.2,1) both; }
+  .fade-up-d2 { animation: ym-fadeUp 0.32s 0.12s cubic-bezier(0.4,0,0.2,1) both; }
+  .fade-up-d3 { animation: ym-fadeUp 0.32s 0.18s cubic-bezier(0.4,0,0.2,1) both; }
+  .fade-up-d4 { animation: ym-fadeUp 0.32s 0.24s cubic-bezier(0.4,0,0.2,1) both; }
+  @keyframes ym-fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Card lift */
+  .card-lift {
+    transition: transform 0.22s cubic-bezier(0.4,0,0.2,1),
+                box-shadow 0.22s cubic-bezier(0.4,0,0.2,1),
+                border-color 0.22s;
+  }
+  .card-lift:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px -6px rgba(30,58,138,0.13), 0 0 0 1px rgba(59,130,246,0.1);
+  }
+
+  /* hover-glow */
+  .hover-glow { transition: box-shadow 0.22s, border-color 0.22s; }
+  .hover-glow:hover {
+    box-shadow: 0 0 0 2px rgba(37,99,235,0.1), 0 4px 20px rgba(37,99,235,0.07);
+    border-color: rgba(37,99,235,0.18) !important;
+  }
+
+  /* stat cards */
+  .stat-card { transition: transform 0.22s; }
+  .stat-card:hover { transform: translateY(-2px); }
+
+  /* Modal backdrop */
+  .modal-bg {
+    background: rgba(15,23,42,0.52);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+
+  /* bell animation */
+  @keyframes bell-ring {
+    0%,100% { transform: rotate(0); }
+    15%      { transform: rotate(16deg); }
+    30%      { transform: rotate(-14deg); }
+    45%      { transform: rotate(10deg); }
+    60%      { transform: rotate(-8deg); }
+    75%      { transform: rotate(4deg); }
+  }
+  .bell-ring { animation: bell-ring 1.2s ease-in-out infinite; transform-origin: top center; }
+
+  /* ===== GASTOS: bloque comprobante cargado ===== */
+  .comprobante-loaded {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.625rem 0.875rem;
+    background: #f0f9ff;
+    border: 1.5px solid #bae6fd;
+    border-radius: 0.875rem;
+    margin-top: 0.5rem;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .comprobante-loaded:hover { border-color: #38bdf8; background: #e0f2fe; }
+  .comprobante-loaded .cl-icon {
+    width: 2.25rem; height: 2.25rem; border-radius: 0.5rem; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    background: #bae6fd;
+  }
+  .comprobante-loaded .cl-icon i { color: #0369a1; font-size: 1rem; }
+  .comprobante-loaded .cl-icon.pdf { background: #fecaca; }
+  .comprobante-loaded .cl-icon.pdf i { color: #dc2626; }
+  .comprobante-loaded .cl-meta { flex: 1; min-width: 0; }
+  .comprobante-loaded .cl-name {
+    font-size: 0.8125rem; font-weight: 600; color: #0c4a6e;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .comprobante-loaded .cl-sub { font-size: 0.7rem; color: #0369a1; margin-top: 1px; }
+</style>
+<div x-data="adminApp({
+  username: '{{ user.username|escapejs }}',
+  email: '{{ user.email|escapejs }}',
+  role: '{{ user.profile.role.name|escapejs }}',
+  defaultSection: '{% if user.profile.role.name == "employee" %}nueva-venta{% else %}dashboard{% endif %}',
+  defaultSubmenu: {% if user.profile.role.name == "employee" %}'ventas'{% else %}null{% endif %},
+  freshLogin: {% if fresh_login %}true{% else %}false{% endif %}
+})" x-init="init()" x-cloak class="flex h-screen overflow-hidden dashboard-shell">
+
+  <!-- Loading Overlay -->
+  <div x-show="showLoadingOverlay" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" class="fixed inset-0 z-[100] flex items-center justify-center bg-ink-950/65 backdrop-blur-md" style="display:none">
+    <div class="dashboard-panel rounded-[1.75rem] p-8 flex flex-col items-center gap-4 min-w-[16rem]">
+      <div class="w-12 h-12 border-4 border-brand-200 border-t-accent-500 rounded-full animate-spin"></div>
+      <p class="text-ink-700 font-medium text-sm">Procesando...</p>
+    </div>
+  </div>
+
+  <!-- Mobile Sidebar Backdrop -->
+  <div x-show="sidebarMobileOpen" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" @click="sidebarMobileOpen = false" class="fixed inset-0 z-40 bg-ink-950/50 backdrop-blur-sm lg:hidden" style="display:none"></div>
+
+  {% include 'core/admin/partials/sidebar.html' %}
+  {% include 'core/admin/partials/header.html' %}
+
+    <div class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-7 scrollbar-auto" :key="adminSection">
+      {% include 'core/admin/partials/sections/dashboard_stats.html' %}
+      {% include 'core/admin/partials/sections/inventario.html' %}
+      {% include 'core/admin/partials/sections/nueva_venta.html' %}
+      {% include 'core/admin/partials/sections/lista_ventas.html' %}
+      {% include 'core/admin/partials/sections/gastos.html' %}
+      {% include 'core/admin/partials/sections/reportes.html' %}
+      {% include 'core/admin/partials/sections/usuarios.html' %}
+      {% include 'core/admin/partials/sections/ayuda.html' %}
+    </div>
+  </main>
+
+<!-- MODALS -->
+{% include 'core/admin/partials/modals/modal_ver_producto.html' %}
+{% include 'core/admin/partials/modals/modal_registrar_lote.html' %}
+{% include 'core/admin/partials/modals/modal_agregar_producto.html' %}
+{% include 'core/admin/partials/modals/modal_eliminar_producto.html' %}
+{% include 'core/admin/partials/modals/modal_ver_pedido.html' %}
+{% include 'core/admin/partials/modals/modal_ver_venta.html' %}
+{% include 'core/admin/partials/modals/modal_ver_boleta.html' %}
+{% include 'core/admin/partials/modals/modal_editar_venta.html' %}
+{% include 'core/admin/partials/modals/modal_agregar_gasto.html' %}
+{% include 'core/admin/partials/modals/modal_ver_gasto.html' %}
+{% include 'core/admin/partials/modals/modal_eliminar_gasto.html' %}
+{% include 'core/admin/partials/modals/modal_crear_trabajador.html' %}
+{% include 'core/admin/partials/modals/modal_ver_usuario.html' %}
+{% include 'core/admin/partials/modals/modal_editar_usuario.html' %}
+{% include 'core/admin/partials/modals/modal_desactivar_usuario.html' %}
+{% include 'core/admin/partials/modals/modal_guia.html' %}
+{% include 'core/admin/partials/modals/modal_pago.html' %}
+{% include 'core/admin/partials/modals/modal_boleta.html' %}
+{% include 'core/admin/partials/modals/modal_exportar.html' %}
+{% include 'core/admin/partials/modals/modal_notificaciones.html' %}
+{% include 'core/admin/partials/modals/modal_cancelar_pedido.html' %}
+{% include 'core/admin/partials/modals/modal_cancelar_venta.html' %}
+{% include 'core/admin/partials/modals/modal_reset_password.html' %}
+{% include 'core/admin/partials/modals/modal_preparar_pedido.html' %}
+{% include 'core/admin/partials/modals/modal_qr_scanner.html' %}
+
+</div>
+{% endblock %}

@@ -1,0 +1,107 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Ghostitzer — ¿Cómo funciona?{% endblock %}
+
+{% block content %}
+<div class="bg-ink-50 min-h-screen">
+
+  {% include 'core/_navbar.html' %}
+
+  <!-- HEADER -->
+  <section class="hero-bg py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <p class="text-[#ffb238] font-display font-800 text-2xl uppercase tracking-widest mb-2">Proceso</p>
+      <h1 class="font-display text-4xl md:text-5xl font-800 text-white mb-4">¿Cómo funciona?</h1>
+      <p class="text-blue-100 text-lg max-w-2xl mx-auto">Descubre qué fácil es comprar en Ghostitzer en solo 4 pasos</p>
+    </div>
+  </section>
+
+  <!-- STEPS -->
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="grid md:grid-cols-2 gap-8 pointer-events-none">
+      <div class="flex gap-6 items-start prod-card-catalog p-6 rounded-2xl stagger-in" style="transition-delay:60ms">
+        <div class="w-16 h-16 rounded-2xl bg-brand-100 flex items-center justify-center flex-shrink-0">
+          <i class="fa-solid fa-user-plus text-brand-600 text-2xl"></i>
+        </div>
+        <div>
+          <span class="text-brand-600 font-display font-800 text-xs uppercase tracking-widest">Paso 1</span>
+          <h3 class="font-display font-700 text-ink-900 text-xl mt-1 mb-2">Crea tu cuenta</h3>
+          <p class="text-ink-500 leading-relaxed">Regístrate gratis en minutos con tu correo electrónico. Solo necesitas tus datos básicos para comenzar a comprar.</p>
+        </div>
+      </div>
+      <div class="flex gap-6 items-start prod-card-catalog p-6 rounded-2xl stagger-in" style="transition-delay:120ms">
+        <div class="w-16 h-16 rounded-2xl bg-accent-100 flex items-center justify-center flex-shrink-0">
+          <i class="fa-solid fa-magnifying-glass text-accent-600 text-2xl"></i>
+        </div>
+        <div>
+          <span class="text-accent-600 font-display font-800 text-xs uppercase tracking-widest">Paso 2</span>
+          <h3 class="font-display font-700 text-ink-900 text-xl mt-1 mb-2">Explora el catálogo</h3>
+          <p class="text-ink-500 leading-relaxed">Filtra por categoría, busca productos específicos y revisa los detalles de cada artículo antes de agregarlo a tu carrito.</p>
+        </div>
+      </div>
+      <div class="flex gap-6 items-start prod-card-catalog p-6 rounded-2xl stagger-in" style="transition-delay:180ms">
+        <div class="w-16 h-16 rounded-2xl bg-green-100 flex items-center justify-center flex-shrink-0">
+          <i class="fa-solid fa-cart-shopping text-green-600 text-2xl"></i>
+        </div>
+        <div>
+          <span class="text-green-600 font-display font-800 text-xs uppercase tracking-widest">Paso 3</span>
+          <h3 class="font-display font-700 text-ink-900 text-xl mt-1 mb-2">Arma tu carrito</h3>
+          <p class="text-ink-500 leading-relaxed">Ajusta cantidades, revisa tu orden y elige tu forma de pago preferida: Yape, Plin o efectivo al recoger.</p>
+        </div>
+      </div>
+      <div class="flex gap-6 items-start prod-card-catalog p-6 rounded-2xl stagger-in" style="transition-delay:240ms">
+        <div class="w-16 h-16 rounded-2xl bg-brand-50 flex items-center justify-center flex-shrink-0">
+          <i class="fa-solid fa-store text-brand-600 text-2xl"></i>
+        </div>
+        <div>
+          <span class="text-brand-600 font-display font-800 text-xs uppercase tracking-widest">Paso 4</span>
+          <h3 class="font-display font-700 text-ink-900 text-xl mt-1 mb-2">Recoge en tienda</h3>
+          <p class="text-ink-500 leading-relaxed">Recibe notificación cuando tu pedido esté listo. Presenta el código QR en tienda y recoge tu compra de forma rápida y segura.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="hero-bg from-brand-600 to-brand-800 py-16">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h2 class="font-display font-800 text-3xl text-white mb-4">¿Listo para comenzar?</h2>
+      <p class="text-blue-100 text-lg mb-8">Explora nuestro catálogo y haz tu primer pedido en minutos</p>
+      <div class="flex gap-4 justify-center flex-wrap">
+        <a href="{% url 'catalog' %}" class="btn-accent text-base px-8 py-3"><i class="fa-solid fa-cart-shopping"></i> Ver catálogo</a>
+        <a href="{% url 'contacto' %}" class="btn-ghost text-base px-8 py-3 border-white/30 text-white hover:border-accent-300 hover:text-accent-200"><i class="fa-solid fa-envelope"></i> Contactar</a>
+      </div>
+    </div>
+  </section>
+
+  {% include 'core/_footer.html' %}
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  var h = document.querySelectorAll('.hero-bg');
+  h.forEach(function(el, i) {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(14px)';
+    el.style.transition = 'opacity .45s cubic-bezier(.4,0,.2,1), transform .45s cubic-bezier(.4,0,.2,1)';
+    setTimeout(function() {
+      el.style.opacity = '1';
+      el.style.transform = 'translateY(0)';
+    }, 60 + i * 50);
+  });
+  var els = document.querySelectorAll('.stagger-in');
+  els.forEach(function(el, i) {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(20px) scale(.98)';
+    setTimeout(function() {
+      el.style.opacity = '1';
+      el.style.transform = 'translateY(0) scale(1)';
+    }, 150 + i * 50);
+  });
+});
+</script>
+{% endblock %}

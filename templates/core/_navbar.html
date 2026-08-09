@@ -1,0 +1,171 @@
+{% load static %}
+{% load nav_tags %}
+
+<div x-data="navbarApp()" x-init="initNavbar()">
+<nav class="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-ink-200 shadow-sm" role="navigation" aria-label="Menú principal del cliente">
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
+
+    <div class="flex items-center gap-3">
+      <button @click="mobileMenuOpen = !mobileMenuOpen" class="lg:hidden p-2 rounded-lg hover:bg-ink-100 transition-colors text-ink-700" aria-label="Abrir menú">
+        <i class="fa-solid fa-bars text-xl"></i>
+      </button>
+      <a href="/" class="flex items-center gap-3">
+        <img src="{% static 'src/images/logo_sin_fondo.png' %}" alt="Logo" class="w-10 h-10 object-contain shrink-0">
+        <img src="{% static 'src/images/titulo_libreria.png' %}" alt="Ghostitzer Library" class="h-14 sm:h-16 object-contain">
+      </a>
+    </div>
+
+    <div class="hidden lg:flex items-center gap-6 text-sm font-medium">
+      {% nav_link 'home' 'Inicio' request.resolver_match.url_name %}
+      {% nav_link 'catalog' 'Catálogo' request.resolver_match.url_name %}
+      {% nav_link 'como_funciona' '¿Cómo funciona?' request.resolver_match.url_name %}
+      {% nav_link 'contacto' 'Contacto' request.resolver_match.url_name %}
+    </div>
+
+    <div class="flex items-center gap-3">
+      <button @click="openCart = true; loadCart()" class="relative p-2 rounded-lg hover:bg-ink-100 transition-all text-ink-700 hover:scale-110 active:scale-95" aria-label="Abrir carrito de compras">
+        <i class="fa-solid fa-cart-shopping text-lg" aria-hidden="true"></i>
+        <span x-show="cartCount > 0" x-text="cartCount" class="absolute -top-1 -right-1 w-5 h-5 bg-brand-600 text-white text-xs font-bold rounded-full flex items-center justify-center scale-in" aria-hidden="true"></span>
+      </button>
+
+      {% if user.is_authenticated %}
+        {% if user.profile.role and user.profile.role.name == 'client' %}
+          <div class="relative">
+            <button type="button" @click.prevent.stop="toggleNotifPanel()" class="relative p-2 rounded-lg hover:bg-ink-100 transition-colors text-ink-700 flex items-center justify-center" aria-label="Notificaciones">
+              <i class="fa-regular fa-bell text-lg" aria-hidden="true"></i>
+              <span x-show="notifCount > 0" x-text="notifCount" class="absolute -top-1 -right-1 w-5 h-5 bg-brand-600 text-white text-xs font-bold rounded-full flex items-center justify-center scale-in" aria-hidden="true"></span>
+            </button>
+            <div x-show="showNotifPanel" @click.outside="showNotifPanel = false" x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" class="absolute right-0 mt-2 w-80 sm:w-96 max-h-[60vh] sm:max-h-[520px] bg-white rounded-xl shadow-xl border border-ink-200 overflow-hidden" style="display:none">
+              <div class="px-3 sm:px-4 py-3 border-b border-ink-100 flex items-center justify-between">
+                <p class="text-sm font-semibold text-ink-900">Notificaciones</p>
+                <button type="button" x-show="notifCount > 0" @click.prevent.stop="marcarLeidas()" class="text-xs text-brand-600 hover:text-brand-700 font-medium whitespace-nowrap">Marcar todas leídas</button>
+              </div>
+              <div x-show="notifLoading" class="p-4 text-center"><i class="fa-solid fa-spinner fa-spin text-ink-300"></i></div>
+              <div x-show="!notifLoading && notifList.length === 0" class="flex flex-col items-center justify-center min-h-[150px] p-4 text-sm text-ink-400">
+                <i class="fa-regular fa-bell-slash text-3xl text-ink-200 mb-3"></i>
+                <p>No tienes notificaciones.</p>
+              </div>
+              <div x-show="!notifLoading && notifList.length > 0" class="max-h-[45vh] sm:max-h-[420px] overflow-y-auto overflow-x-hidden">
+                <template x-for="n in notifList" :key="n.id">
+                  <div class="px-3 sm:px-4 py-3 border-b border-ink-50 hover:bg-ink-50 transition-colors" :class="!n.is_read ? 'bg-blue-50/50' : ''">
+                    <div class="flex items-start gap-2 sm:gap-3">
+                      <div class="w-2 h-2 rounded-full mt-1.5 flex-shrink-0" :class="!n.is_read ? 'bg-blue-500' : 'bg-transparent'"></div>
+                      <div class="flex-1 min-w-0">
+                        <div class="flex items-start justify-between gap-2">
+                          <div class="min-w-0 flex-1">
+                            <p class="text-sm font-medium text-ink-800 truncate" x-text="n.title"></p>
+                            <p class="text-xs text-ink-500 mt-0.5 line-clamp-2 sm:truncate" x-text="n.message"></p>
+                          </div>
+                          <button type="button" @click.prevent.stop="marcarLeida(n)" class="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center transition-colors" :class="n.is_read ? 'text-green-600 hover:bg-green-50' : 'text-ink-400 hover:bg-ink-100 hover:text-ink-600'" :title="n.is_read ? 'Revisada' : 'No revisada'">
+                            <i :class="n.is_read ? 'fa-solid fa-check text-xs' : 'fa-regular fa-circle text-xs'"></i>
+                          </button>
+                        </div>
+                        <p class="text-xs text-ink-400 mt-2" x-text="n.created_at"></p>
+                      </div>
+                    </div>
+                  </div>
+                </template>
+              </div>
+              <div x-show="!notifLoading && notifList.length > 0" class="px-4 py-3 border-t border-ink-100 text-center">
+                <a href="{% url 'notificaciones' %}" class="text-xs text-brand-600 hover:text-brand-700 font-semibold">Ver más notificaciones</a>
+              </div>
+            </div>
+          </div>
+        {% endif %}
+
+        <div x-data="{ openDropdown: false }" class="relative">
+          <button @click="openDropdown = !openDropdown" class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-ink-100 transition-colors" aria-label="Menú de usuario" :aria-expanded="openDropdown.toString()">
+            <div class="w-8 h-8 rounded-full bg-brand-700 flex items-center justify-center text-white text-sm font-bold" aria-hidden="true">
+              {{ user.first_name|first|default:user.username|first }}
+            </div>
+            <span class="text-sm font-medium text-ink-800 hidden sm:inline">{{ user.username }}</span>
+            <i class="fa-solid fa-chevron-down text-xs text-ink-400 transition-transform" :class="{ 'rotate-180': openDropdown }" aria-hidden="true"></i>
+          </button>
+          <div x-show="openDropdown" @click.outside="openDropdown = false" x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" class="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-xl border border-ink-200 overflow-hidden" style="display:none">
+            <div class="px-4 py-3 border-b border-ink-100">
+              <p class="text-sm font-semibold text-ink-900 truncate">{{ user.email }}</p>
+              <span class="badge mt-1 text-xs" :class="'{{ user.profile.role.name }}' === 'admin' ? 'bg-purple-100 text-purple-700' : 'bg-yellow-100 text-yellow-700'">{{ user.profile.role.display_name }}</span>
+            </div>
+            <div class="py-1">
+              <a href="{% url 'profile' %}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-ink-700 hover:bg-ink-50 transition-colors"><i class="fa-regular fa-user w-5 text-center text-ink-400"></i> Mi Perfil</a>
+              {% if user.profile.role and user.profile.role.name == 'admin' or user.profile.role and user.profile.role.name == 'employee' %}
+                <a href="{% url 'dashboard' %}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-ink-700 hover:bg-ink-50 transition-colors"><i class="fa-solid fa-gauge-high w-5 text-center text-ink-400"></i> Panel administrativo</a>
+              {% else %}
+                <a href="{% url 'my_orders' %}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-ink-700 hover:bg-ink-50 transition-colors"><i class="fa-regular fa-clock w-5 text-center text-ink-400"></i> Mis Pedidos</a>
+              {% endif %}
+              <hr class="my-1 border-ink-100">
+              <a href="{% url 'logout' %}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"><i class="fa-solid fa-arrow-right-from-bracket w-5 text-center"></i> Cerrar sesión</a>
+            </div>
+          </div>
+        </div>
+      {% else %}
+        <div class="hidden lg:flex gap-2">
+          <a href="{% url 'login' %}" class="btn-ghost py-2 px-4 text-sm">Iniciar sesión</a>
+          <a href="{% url 'register' %}" class="btn-accent btn-accent-blue py-2 px-4 text-sm">Registrarse</a>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+</nav>
+
+  <!-- Mobile Menu Drawer -->
+  <div x-show="mobileMenuOpen" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 z-50 lg:hidden" style="display:none">
+    <!-- Backdrop -->
+    <div class="absolute inset-0 bg-ink-950/50 backdrop-blur-sm" @click="mobileMenuOpen = false"></div>
+    <!-- Drawer -->
+    <div x-show="mobileMenuOpen" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="-translate-x-full" x-transition:enter-end="translate-x-0" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="translate-x-0" x-transition:leave-end="-translate-x-full" class="absolute left-0 top-0 h-full w-72 bg-white shadow-xl overflow-y-auto" style="display:none">
+      <div class="flex items-center justify-between p-4 border-b border-ink-100">
+        <div class="flex items-center gap-3">
+          <img src="{% static 'src/images/logo_sin_fondo.png' %}" alt="Ghostitzer Library" class="w-8 h-8 object-contain">
+          <span class="font-display font-800 text-lg text-ink-900">Menú</span>
+        </div>
+        <button @click="mobileMenuOpen = false" class="p-2 rounded-lg hover:bg-ink-100 text-ink-500" aria-label="Cerrar menú">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+      <nav class="p-4 space-y-1">
+        <a href="{% url 'home' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-ink-700 hover:bg-ink-50 transition-colors">
+          <i class="fa-solid fa-house w-5 text-center text-ink-400"></i> Inicio
+        </a>
+        <a href="{% url 'catalog' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-ink-700 hover:bg-ink-50 transition-colors">
+          <i class="fa-solid fa-store w-5 text-center text-ink-400"></i> Catálogo
+        </a>
+        <a href="{% url 'como_funciona' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-ink-700 hover:bg-ink-50 transition-colors">
+          <i class="fa-solid fa-circle-question w-5 text-center text-ink-400"></i> ¿Cómo funciona?
+        </a>
+        <a href="{% url 'contacto' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-ink-700 hover:bg-ink-50 transition-colors">
+          <i class="fa-solid fa-envelope w-5 text-center text-ink-400"></i> Contacto
+        </a>
+      </nav>
+      <div class="p-4 border-t border-ink-100">
+        {% if user.is_authenticated %}
+          <div class="flex items-center gap-3 px-4 py-3 mb-3">
+            <div class="w-10 h-10 rounded-full bg-brand-700 flex items-center justify-center text-white text-sm font-bold">
+              {{ user.first_name|first|default:user.username|first }}
+            </div>
+            <div class="min-w-0">
+              <p class="text-sm font-medium text-ink-900 truncate">{{ user.username }}</p>
+              <p class="text-xs text-ink-500 truncate">{{ user.email }}</p>
+            </div>
+          </div>
+          <a href="{% url 'logout' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-600 hover:bg-red-50 transition-colors">
+            <i class="fa-solid fa-arrow-right-from-bracket w-5 text-center"></i> Cerrar sesión
+          </a>
+        {% else %}
+          <div class="flex flex-col gap-2">
+            <a href="{% url 'login' %}" class="btn-ghost py-2 px-4 text-sm text-center">Iniciar sesión</a>
+            <a href="{% url 'register' %}" class="btn-accent btn-accent-blue py-2 px-4 text-sm text-center">Registrarse</a>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  {% include 'core/_cart_modal.html' %}
+  {% include 'core/_auth_modal.html' %}
+  {% include 'core/_orders_modal.html' %}
+  {% include 'core/_confirm_modal.html' %}
+
+</div>

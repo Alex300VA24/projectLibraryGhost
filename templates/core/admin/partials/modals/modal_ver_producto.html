@@ -1,0 +1,48 @@
+<div x-show="showModalVerProducto" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-bg" @click.self="showModalVerProducto = false" @keydown.escape.window="showModalVerProducto = false" role="dialog" aria-modal="true" aria-labelledby="modal-detalle-producto" style="display:none">
+  <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto" @click.stop>
+    <div class="flex items-center justify-between p-5 border-b border-ink-100">
+      <h3 id="modal-detalle-producto" class="text-2xl font-display font-700 text-ink-900">Detalle del Producto</h3>
+      <button @click="showModalVerProducto = false" class="w-8 h-8 rounded-lg hover:bg-ink-100 flex items-center justify-center text-ink-400" aria-label="Cerrar modal"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="p-5 space-y-4" x-show="productoVer">
+      <div class="flex items-center gap-4">
+        <template x-if="productoVer?.imagen">
+          <img :src="productoVer?.imagen" class="w-14 h-14 rounded-xl object-cover" alt="imagen">
+        </template>
+        <template x-if="!productoVer?.imagen">
+          <div class="w-14 h-14 rounded-xl flex items-center justify-center" :style="'background:' + (productoVer?.color || '#ccc')"><i :class="(productoVer?.icono || '') + ' text-white text-xl'"></i></div>
+        </template>
+        <div><p class="font-display font-700 text-ink-900" x-text="productoVer?.nombre"></p><p class="text-ink-400 text-sm" x-text="productoVer?.codigo"></p></div>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div class="bg-ink-50 rounded-xl p-3"><p class="text-xs text-ink-400 mb-1">Categoria</p><p class="font-medium text-ink-800 text-sm" x-text="productoVer?.categoria"></p></div>
+        <div class="bg-ink-50 rounded-xl p-3"><p class="text-xs text-ink-400 mb-1">Precio de venta</p><p class="font-display font-700 text-ink-900" x-text="'S/ ' + productoPrecio(productoVer).toFixed(2)"></p></div>
+        <div class="bg-ink-50 rounded-xl p-3"><p class="text-xs text-ink-400 mb-1">Precio de compra</p><p class="font-display font-700 text-ink-600" x-text="'S/ ' + (productoVer?.precioCompra || 0).toFixed(2)"></p></div>
+        <div class="bg-ink-50 rounded-xl p-3"><p class="text-xs text-ink-400 mb-1">Stock</p><p class="font-semibold" :class="productoStock(productoVer) < (productoVer?.umbral || 0) ? 'text-red-500' : 'text-green-600'" x-text="productoStock(productoVer)"></p></div>
+      </div>
+      <div>
+        <h4 class="font-semibold text-ink-800 text-sm mb-2">Lotes registrados <span class="text-ink-400 font-normal" x-text="'(' + (productoVer?.lotes?.length || 0) + ')'"></span></h4>
+        <div class="space-y-2 max-h-48 overflow-y-auto">
+          <template x-for="lote in (productoVer?.lotes || [])" :key="lote.id">
+            <div class="flex items-center justify-between p-2 bg-ink-50 rounded-lg">
+              <div class="min-w-0">
+                <div class="flex items-center gap-1.5">
+                  <span class="text-xs font-mono font-semibold text-brand-700 bg-brand-50 px-1.5 py-0.5 rounded" x-text="lote.numeroLote"></span>
+                  <span class="text-xs text-ink-400 truncate" x-text="lote.proveedor || 'Sin proveedor'"></span>
+                </div>
+                <p class="text-xs text-ink-400 mt-0.5" x-show="lote.fechaVencimiento">
+                  <i class="fa-regular fa-calendar mr-0.5"></i>Vence: <span x-text="lote.fechaVencimiento"></span>
+                </p>
+              </div>
+              <div class="text-right flex-shrink-0 ml-3">
+                <span class="text-xs font-semibold text-ink-800" x-text="'S/ ' + lote.precio.toFixed(2)"></span>
+                <span class="text-xs text-ink-500 ml-1.5 bg-ink-100 px-1.5 py-0.5 rounded-full" x-text="'x' + lote.cantidad"></span>
+              </div>
+            </div>
+          </template>
+          <div x-show="!productoVer?.lotes || productoVer.lotes.length === 0" class="text-center text-ink-400 text-sm py-6">No hay lotes registrados para este producto</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

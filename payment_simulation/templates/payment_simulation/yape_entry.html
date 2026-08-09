@@ -1,0 +1,59 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Yape - Libreria Ghostitzer{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'src/css/phone-sim.css' %}">
+
+<div class="sim-wrapper">
+<div class="phone-frame">
+    <div class="sim-statusbar" style="background:#7B1FA2;">
+        <span class="sim-time">12:30</span>
+        <div class="sim-icons">
+            <svg viewBox="0 0 24 24"><path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3c-1.65-1.66-4.34-1.66-6 0zm-4-4l2 2c2.76-2.76 7.24-2.76 10 0l2-2C15.14 9.14 8.87 9.14 5 13z"/></svg>
+            <svg viewBox="0 0 24 24"><path d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4z"/></svg>
+        </div>
+    </div>
+
+    <div class="sim-header" style="position:relative;display:flex;justify-content:center;align-items:center;height:56px;border-bottom:1px solid #e8e8e8;">
+    
+        <div class="sim-back" style="position:absolute;left:16px;">
+            <a href="{% url 'payment_simulation:home' %}" style="display:flex;align-items:center;justify-content:center;width:36px;height:36px;">
+                <svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:#00c853;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round;">
+                    <path d="M15 18l-6-6 6-6"/>
+                </svg>
+            </a>
+        </div>
+
+        <span class="sim-title" style="font-size:18px;font-weight:600;text-align:center;">
+            Libreria Ghostitzer
+        </span>
+
+    </div>
+
+    <div class="sim-content">
+        <div class="w-16 h-16 rounded-xl mx-auto mb-3 flex items-center justify-center overflow-hidden transition-transform duration-300 group-hover:scale-110">
+                <img src="{% static 'src/images/yape_logo.jfif' %}" alt="Yape Logo" class="w-full h-full object-cover">
+        </div>
+        <div class="sim-subtitle">Libreria Ghostitzer</div>
+
+        <a href="{% url 'payment_simulation:yape_pedidos' %}?from=code" class="sim-menu-btn code">
+            <div class="sim-menu-icon" style="background:#e1bee7;">🔑</div>
+            <div class="sim-menu-text">
+                Código de aprobación
+                <small>Genera un código de 6 dígitos</small>
+            </div>
+        </a>
+
+        <a href="{% url 'payment_simulation:yape_pedidos' %}" class="sim-menu-btn pedidos">
+            <div class="sim-menu-icon" style="background:#f5f5f5;">📋</div>
+            <div class="sim-menu-text">
+                Pedidos
+                <small>Ver lista de pedidos pendientes</small>
+            </div>
+        </a>
+    </div>
+</div>
+</div>
+{% endblock %}

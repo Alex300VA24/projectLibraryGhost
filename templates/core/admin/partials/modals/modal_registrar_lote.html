@@ -1,0 +1,75 @@
+<div x-show="showModalRegistrarLote" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-bg" @click.self="showModalRegistrarLote = false" @keydown.escape.window="showModalRegistrarLote = false" role="dialog" aria-modal="true" aria-labelledby="modal-registrar-lote" style="display:none">
+  <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto" @click.stop>
+    <div class="flex items-center justify-between p-5 border-b border-ink-100">
+      <h3 id="modal-registrar-lote" class="text-2xl font-display font-700 text-ink-900" x-text="formLote.modo === 'edit' ? 'Editar Lote' : 'Registrar Lote'"></h3>
+      <button @click="showModalRegistrarLote = false" class="w-8 h-8 rounded-lg hover:bg-ink-100 flex items-center justify-center text-ink-400" aria-label="Cerrar modal"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="p-5 space-y-4">
+      <div class="bg-blue-50 border border-blue-200 rounded-xl p-3 flex items-start gap-2">
+        <i class="fa-solid fa-circle-info text-blue-500 mt-0.5"></i>
+        <p class="text-sm text-blue-700">Los campos marcados con <span class="text-red-500 font-semibold">*</span> son obligatorios</p>
+      </div>
+      <div class="bg-brand-50 rounded-xl p-3 border border-brand-200 flex items-center gap-3">
+        <template x-if="formLote?.productoImagen">
+          <img :src="formLote?.productoImagen" class="w-10 h-10 rounded-xl object-contain bg-ink-50" alt="imagen">
+        </template>
+        <template x-if="!formLote?.productoImagen">
+          <div class="w-10 h-10 rounded-xl flex items-center justify-center" :style="'background:' + (formLote?.productoColor || '#ccc')"><i :class="(formLote?.productoIcono || 'fa-solid fa-box') + ' text-white'"></i></div>
+        </template>
+        <div><p class="font-semibold text-ink-800 text-sm" x-text="formLote?.productoNombre"></p><p class="text-xs text-ink-400" x-text="formLote?.productoCodigo"></p></div>
+      </div>
+      <div class="space-y-4">
+        <div x-show="formLote.modo === 'edit'" class="space-y-3">
+          <label class="block text-xs font-semibold text-ink-500 uppercase tracking-wide mb-1.5">Seleccione lote</label>
+          <select x-model.number="formLote.loteId" @change="changeSelectedLote()" class="inp w-full">
+            <template x-for="lote in selectedProductoLotes()" :key="lote.id">
+              <option :value="lote.id" x-text="lote.numeroLote + ' — ' + lote.cantidad + ' unidades' + (lote.isLocked ? ' (bloqueado)' : '')"></option>
+            </template>
+          </select>
+          <div x-show="currentLoteIsLocked()" class="bg-amber-50 border-2 border-amber-300 rounded-xl p-4 flex items-start gap-3">
+            <div class="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
+              <i class="fa-solid fa-triangle-exclamation text-amber-600 text-lg"></i>
+            </div>
+            <div>
+              <p class="text-sm font-semibold text-amber-800">Lote con movimientos de venta</p>
+              <p class="text-xs text-amber-600 mt-1">Los campos de precio y cantidad están bloqueados. Solo puedes editar proveedor y fecha de vencimiento.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-semibold text-ink-500 uppercase tracking-wide mb-1.5">Proveedor <span class="text-ink-400 font-normal lowercase">(opcional)</span></label>
+          <input x-model="formLote.proveedor" type="text" class="inp" placeholder="Nombre del proveedor">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-ink-500 uppercase tracking-wide mb-1.5 required-field">Precio unitario (S/)</label>
+          <input x-model.number="formLote.precio" type="number" step="0.01" min="0.01" class="inp" placeholder="0.00" @input="errorPrecioLote = ''" :disabled="currentLoteIsLocked()">
+          <p x-show="errorPrecioLote" x-text="errorPrecioLote" class="text-xs text-red-500 mt-1"></p>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-ink-500 uppercase tracking-wide mb-1.5 required-field">Cantidad</label>
+          <input x-model.number="formLote.cantidad" type="number" min="1" class="inp" placeholder="0" @input="errorCantidadLote = ''" :disabled="currentLoteIsLocked()">
+          <p x-show="errorCantidadLote" x-text="errorCantidadLote" class="text-xs text-red-500 mt-1"></p>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-ink-500 uppercase tracking-wide mb-1.5 required-field">Fecha de vencimiento</label>
+          <input x-model="formLote.fechaVencimiento" type="date" class="inp" @change="errorFechaLote = ''">
+          <p x-show="errorFechaLote" x-text="errorFechaLote" class="text-xs text-red-500 mt-1"></p>
+        </div>
+      </div>
+      <div class="bg-ink-50 rounded-xl p-3">
+        <p class="text-xs text-ink-400 mb-2">Resumen del lote</p>
+        <div class="flex justify-between text-sm"><span class="text-ink-500">Precio unitario</span><span class="font-semibold text-ink-800" x-text="'S/ ' + (formLote.precio || 0).toFixed(2)"></span></div>
+        <div class="flex justify-between text-sm"><span class="text-ink-500">Cantidad</span><span class="font-semibold text-ink-800" x-text="formLote.cantidad || 0"></span></div>
+        <div class="flex justify-between text-sm border-t border-ink-200 pt-2 mt-2"><span class="text-ink-900 font-semibold">Valor total</span><span class="font-display font-800 text-brand-700" x-text="'S/ ' + ((formLote.precio || 0) * (formLote.cantidad || 0)).toFixed(2)"></span></div>
+      </div>
+      <div class="flex gap-3">
+        <button @click="showModalRegistrarLote = false" class="btn-ghost flex-1">Cerrar</button>
+        <button @click="guardarLote()" class="btn-primary flex-1 py-3 text-sm font-bold shadow-lg shadow-brand-200">
+          <i class="fa-solid fa-floppy-disk"></i> <span x-text="formLote.modo === 'edit' ? 'Actualizar Lote' : 'Guardar Lote'"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

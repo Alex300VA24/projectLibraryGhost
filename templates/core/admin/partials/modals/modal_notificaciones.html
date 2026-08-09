@@ -1,0 +1,38 @@
+<!-- MODAL: Notificaciones -->
+<div x-show="showModalNotificaciones" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-bg" @click.self="showModalNotificaciones = false" @keydown.escape.window="showModalNotificaciones = false" role="dialog" aria-modal="true" aria-labelledby="modal-notificaciones" style="display:none">
+  <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto modal-inner-scroll" @click.stop>
+    <div class="flex items-center justify-between p-5 border-b border-ink-100">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-brand-100 flex items-center justify-center"><i class="fa-solid fa-bell text-brand-600"></i></div>
+        <div>
+          <h3 id="modal-notificaciones" class="text-2xl font-display font-700 text-ink-900">Notificaciones</h3>
+          <p class="text-xs text-ink-400" x-text="pedidos.length + ' pedido(s) activo(s)'"></p>
+        </div>
+      </div>
+      <button @click="showModalNotificaciones = false" class="w-8 h-8 rounded-lg hover:bg-ink-100 flex items-center justify-center text-ink-400" aria-label="Cerrar modal"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="p-5">
+      <div x-show="pedidos.length === 0" class="empty-state py-8">
+        <i class="fa-regular fa-bell-slash text-ink-300 text-4xl mb-3"></i>
+        <p class="font-display font-600 text-ink-500">Sin notificaciones</p>
+        <p class="text-ink-400 text-sm mt-1">No hay pedidos online activos.</p>
+      </div>
+      <div class="space-y-3" x-show="pedidos.length > 0">
+        <template x-for="pedido in pedidos" :key="pedido.id">
+          <button @click="showModalNotificaciones = false; adminSection = 'nueva-venta'; ventaTab = 'online'; $nextTick(() => verPedidoOnline(pedido))" class="w-full bg-ink-50 rounded-xl p-4 text-left hover:bg-ink-100 transition-colors cursor-pointer">
+            <div class="flex items-center justify-between mb-2">
+              <span class="font-mono text-xs text-ink-500" x-text="'#PED-' + pedido.id"></span>
+              <span class="badge" :class="adminOrderBadgeClass(pedido.estado)"><i :class="statusIcon(pedido.estado)"></i> <span x-text="pedido.estado"></span></span>
+            </div>
+            <p class="font-medium text-ink-800 text-sm" x-text="pedido.cliente"></p>
+            <p class="text-xs text-ink-400 mt-1" x-text="pedido.items + ' producto(s)'"></p>
+            <div class="flex items-center justify-between mt-2">
+              <span class="font-display font-700 text-ink-900" x-text="'S/ ' + pedido.total.toFixed(2)"></span>
+              <span class="text-xs text-ink-400" x-text="pedido.fecha"></span>
+            </div>
+          </button>
+        </template>
+      </div>
+    </div>
+  </div>
+</div>

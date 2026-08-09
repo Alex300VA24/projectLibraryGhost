@@ -1,0 +1,33 @@
+{% load static %}
+
+<footer class="bg-ink-950 text-ink-400 py-12 pb-20 lg:pb-12">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid sm:grid-cols-2 md:grid-cols-3 gap-8">
+    <div>
+      <div class="flex items-center gap-2 mb-3">
+        <img src="{% static 'src/images/logo_sin_fondo.png' %}" alt="Logo" class="w-5 h-5 object-contain shrink-0">
+        <img src="{% static 'src/images/titulo_libreria.png' %}" alt="Ghostitzer Library" class="h-5 object-contain">
+      </div>
+      <p class="text-sm leading-relaxed">Útiles escolares, material de oficina, impresiones y copias. Tu librería de confianza en Trujillo.</p>
+    </div>
+    <div>
+      <h4 class="font-display font-700 text-white text-sm uppercase tracking-widest mb-3">Contacto</h4>
+      <div class="space-y-2 text-sm">
+        <p><i class="fa-solid fa-envelope mr-2 footer-icon"></i> contacto@ghostitzerlibrary.com</p>
+        <p><i class="fa-solid fa-phone mr-2 footer-icon"></i> +51 123 456 789</p>
+        <p><i class="fa-solid fa-location-dot mr-2 footer-icon"></i> Calle Principal, Trujillo, La Libertad, Perú</p>
+      </div>
+    </div>
+    <div>
+      <h4 class="font-display font-700 text-white text-sm uppercase tracking-widest mb-3">Acceso rápido</h4>
+      <div class="space-y-2 text-sm">
+        <p><a href="{% url 'catalog' %}" class="hover:text-accent-300 transition-colors">Catálogo de productos</a></p>
+        <p><a href="{% url 'como_funciona' %}" class="hover:text-accent-300 transition-colors">¿Cómo funciona?</a></p>
+        <p><a href="{% url 'contacto' %}" class="hover:text-accent-300 transition-colors">Contacto</a></p>
+
+      </div>
+    </div>
+  </div>
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 pt-6 border-t border-ink-800 text-xs text-center">
+    &copy; 2026 Ghostitzer. Todos los derechos reservados.
+  </div>
+</footer>

@@ -1,0 +1,145 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Transferir a tercero BCP{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'src/css/phone-sim.css' %}">
+
+{% if success %}
+<div class="max-w-md mx-auto px-4 py-12">
+    <div class="bg-white rounded-2xl shadow-lg border border-green-100 overflow-hidden">
+        <div class="bg-blue-600 p-6 text-white text-center">
+            <h1 class="text-2xl font-bold font-display">Transferencia BCP</h1>
+        </div>
+        <div class="text-center py-8">
+            <div class="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
+                <i class="fa-solid fa-circle-check text-green-500 text-4xl"></i>
+            </div>
+            <h3 class="text-xl font-semibold text-gray-800 mb-2 font-display">Transferencia realizada!</h3>
+            <p class="text-gray-500 text-sm">El pedido N°{{ order.order_number|default:order.id }} ha sido pagado exitosamente.</p>
+            <a href="{% url 'payment_simulation:home' %}" class="inline-flex items-center gap-2 mt-6 px-6 py-3 bg-green-600 text-white rounded-xl font-semibold text-sm transition-all hover:bg-green-700 hover:shadow-lg hover:-translate-y-0.5">
+                <i class="fa-solid fa-home"></i> Volver al inicio
+            </a>
+        </div>
+    </div>
+</div>
+
+{% elif pending_orders %}
+<div class="max-w-md mx-auto px-4 py-12">
+    <div class="bg-white rounded-2xl shadow-lg border border-green-100 overflow-hidden">
+        <div class="bg-blue-600 p-6 text-white text-center">
+            <h1 class="text-2xl font-bold font-display">Transferencia BCP</h1>
+        </div>
+        <div class="p-6">
+            <div class="w-16 h-16 rounded-xl mx-auto mb-3 flex items-center justify-center overflow-hidden transition-transform duration-300 group-hover:scale-110">
+                <img src="{% static 'src/images/bcp_logo.jpg' %}" alt="Plin Logo" class="w-full h-full object-cover">
+            </div>
+            <h3 class="text-lg font-semibold text-gray-800 text-center mb-6 font-display">Selecciona un pedido</h3>
+            <div class="space-y-3 max-h-80 overflow-y-auto">
+                {% for o in pending_orders %}
+                <a href="{% url 'payment_simulation:bcp_transfer_with_order' order_id=o.id %}" class="block bg-green-50 rounded-xl p-4 border border-green-200 transition-all duration-250 hover:bg-green-100 hover:shadow-md hover:-translate-y-0.5">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <span class="font-semibold text-gray-800 text-sm">Pedido N°{{ o.order_number|default:o.id }}</span>
+                            <span class="text-xs text-gray-500 ml-2">({{ o.boleta_code }})</span>
+                        </div>
+                        <span class="font-bold text-lg text-green-600">S/ {{ o.total|floatformat:2 }}</span>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+            <div class="mt-6 text-center">
+                <a href="{% url 'payment_simulation:home' %}" class="text-green-600 hover:text-green-800 text-sm font-medium transition-colors">
+                    <i class="fa-solid fa-arrow-left mr-1"></i> Volver al inicio
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% if order and not success %}
+<div class="sim-wrapper" style="background:#fff;">
+<div class="phone-frame" style="height:auto;min-height:100vh;border-radius:0;box-shadow:none;">
+    <div class="sim-statusbar" style="background:#fff;color:#333;padding-top:8px;">
+        <span class="sim-time">1:02</span>
+        <div class="sim-icons" style="color:#333;">
+            <span style="font-size:13px;">Vo LTE</span>
+            <span style="font-size:13px;">52%</span>
+        </div>
+    </div>
+
+    <div class="sim-header" style="border-bottom:1px solid #e8e8e8;">
+        <div class="sim-back">
+            <a href="{% url 'payment_simulation:home' %}" style="font-size:22px;color:#333;text-decoration:none;">&#8592;</a>
+        </div>
+        <span class="sim-title">Transferir a tercero BCP</span>
+        <div class="sim-back">
+            <a href="{% url 'payment_simulation:home' %}" style="font-size:24px;color:#333;text-decoration:none;">&#10005;</a>
+        </div>
+    </div>
+
+    <div class="sim-content" style="padding:16px 16px 0;">
+        <div style="display:flex;flex-direction:column;align-items:center;padding:16px 0 8px;">
+            <div style="width:48px;height:48px;border-radius:50%;background:#4285f4;color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:600;margin-bottom:12px;">MY</div>
+            <div style="font-size:15px;font-weight:600;color:#4285f4;margin-bottom:2px;">Libreria Ghostitzer</div>
+            <div style="font-size:14px;color:#666;margin-bottom:10px;">****7890 - Moneda Soles</div>
+            <div style="display:flex;align-items:center;gap:6px;color:#f57c00;font-size:15px;font-weight:500;cursor:pointer;">
+                <span style="font-size:18px;">&#9734;</span>
+                <span>Agregar a favoritos</span>
+            </div>
+        </div>
+
+        <div style="height:1px;background:#e0e0e0;margin:12px 0;"></div>
+
+        <div style="font-size:18px;font-weight:600;color:#1a237e;padding:8px 0;">Moneda y monto</div>
+
+        <div style="display:flex;padding:8px 0;">
+            <div style="display:flex;background:#e8e8e8;border-radius:20px;padding:3px;width:72px;height:36px;align-items:center;position:relative;">
+                <div style="position:absolute;left:3px;top:3px;width:34px;height:30px;background:#fff;border-radius:16px;box-shadow:0 1px 3px rgba(0,0,0,0.2);"></div>
+                <span style="flex:1;text-align:center;font-size:13px;font-weight:600;color:#fff;z-index:1;line-height:30px;">S/</span>
+                <span style="flex:1;text-align:center;font-size:13px;font-weight:600;color:#999;z-index:1;line-height:30px;">$</span>
+            </div>
+        </div>
+
+        <div style="padding:8px 0 4px;">
+            <input type="number" style="font-size:42px;font-weight:400;color:#1a237e;letter-spacing:-1px;border:none;border-bottom:1px solid #ddd;width:100%;padding:8px 0;outline:none;background:transparent;" id="montoInput" value="{{ order.total|floatformat:2 }}" step="0.01" min="0">
+        </div>
+
+        <div style="padding:8px 0;">
+            <div style="font-size:18px;font-weight:600;color:#1a237e;margin-bottom:12px;">Desde</div>
+            <div style="display:flex;justify-content:space-between;align-items:center;background:#fff;border:1px solid #e0e0e0;border-radius:12px;padding:14px 16px;box-shadow:0 1px 4px rgba(0,0,0,0.06);">
+                <div>
+                    <div style="font-size:16px;font-weight:500;color:#333;">Cuenta Digital Soles</div>
+                    <div style="font-size:13px;color:#999;margin-top:2px;">****6639</div>
+                </div>
+                <div style="font-size:18px;font-weight:500;color:#333;">S/ 1,500.00</div>
+            </div>
+        </div>
+
+        <div style="flex:1;"></div>
+    </div>
+
+    <form method="post" style="text-align:center;padding:0 16px 16px;">
+        {% csrf_token %}
+        <input type="hidden" name="order_id" value="{{ order.id }}">
+        <input type="hidden" name="monto" id="montoHidden" value="{{ order.total|floatformat:2 }}">
+        <button type="submit" style="width:100%;padding:16px;background:#00c853;color:#fff;border:none;border-radius:28px;font-size:16px;font-weight:500;text-align:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,200,83,0.3);transition:all 0.25s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 20px rgba(0,200,83,0.4)'" onmouseout="this.style.transform='';this.style.boxShadow='0 2px 8px rgba(0,200,83,0.3)'">Realizar Transferencia</button>
+    </form>
+
+    <div style="display:flex;justify-content:center;align-items:center;gap:60px;padding:12px 0 8px;background:#fff;">
+        <div style="width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-bottom:10px solid #999;"></div>
+        <div style="width:10px;height:10px;background:#333;border-radius:50%;"></div>
+        <div style="width:10px;height:10px;background:#999;border-radius:2px;"></div>
+    </div>
+</div>
+</div>
+
+<script>
+document.getElementById('montoInput').addEventListener('input', function() {
+    document.getElementById('montoHidden').value = this.value;
+});
+</script>
+{% endif %}
+{% endblock %}

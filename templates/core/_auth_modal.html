@@ -1,0 +1,29 @@
+<div x-show="showAuthModal"
+     x-transition:enter="transition ease-out duration-200"
+     x-transition:enter-start="opacity-0"
+     x-transition:enter-end="opacity-100"
+     x-transition:leave="transition ease-in duration-150"
+     x-transition:leave-start="opacity-100"
+     x-transition:leave-end="opacity-0"
+     class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-bg"
+     @click.self="showAuthModal = false"
+     @keydown.escape.window="showAuthModal = false"
+     style="display:none">
+  <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 text-center" @click.stop>
+    <div class="w-14 h-14 rounded-full bg-brand-100 flex items-center justify-center mx-auto mb-4">
+      <i class="fa-solid fa-cart-shopping text-brand-600 text-xl"></i>
+    </div>
+    <h3 class="font-display font-700 text-lg text-ink-900 mb-2">Inicia sesión para continuar</h3>
+    <p class="text-ink-500 text-sm mb-6">Necesitas una cuenta para finalizar tu compra.</p>
+    <div class="flex gap-3">
+      <button @click="showAuthModal = false"
+              class="btn-ghost flex-1 py-3 text-sm">
+        <i class="fa-solid fa-xmark mr-1"></i> Cancelar
+      </button>
+      <a :href="loginUrl + '?next=/pago/'"
+         class="btn-accent flex-1 py-3 text-sm font-bold inline-flex items-center justify-center gap-2">
+        <i class="fa-solid fa-arrow-right-to-bracket"></i> Iniciar sesión
+      </a>
+    </div>
+  </div>
+</div>

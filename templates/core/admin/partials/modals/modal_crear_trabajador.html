@@ -1,0 +1,63 @@
+<div x-show="showModalCrearTrabajador" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-bg" @click.self="showModalCrearTrabajador = false" @keydown.escape.window="showModalCrearTrabajador = false" role="dialog" aria-modal="true" aria-labelledby="modal-registrar-usuario" style="display:none">
+  <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto" @click.stop>
+    <div class="flex items-center justify-between p-5 border-b border-ink-100">
+      <h3 id="modal-registrar-usuario"
+          class="text-2xl font-display font-700 text-ink-900">
+          Registrar Usuario
+      </h3>
+      <button @click="showModalCrearTrabajador = false" class="w-8 h-8 rounded-lg hover:bg-ink-100 flex items-center justify-center text-ink-400" aria-label="Cerrar modal"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="p-5 space-y-4">
+      <div class="bg-blue-50 border border-blue-200 rounded-xl p-3 flex items-start gap-2">
+        <i class="fa-solid fa-circle-info text-blue-500 mt-0.5"></i>
+        <p class="text-sm text-blue-700">Los campos marcados con <span class="text-red-500 font-semibold">*</span> son obligatorios</p>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-semibold text-ink-500 uppercase tracking-wide mb-1.5 required-field">Nombre</label>
+          <input x-model="formNuevoUsuario.nombre" type="text" class="inp" placeholder="Edinson Alonso" @input="formNuevoUsuario.nombre = formFiltrarNombre(formNuevoUsuario.nombre)">
+          <p x-show="errorNombreCrear" x-text="errorNombreCrear" class="text-xs text-red-500 mt-1"></p>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-ink-500 uppercase tracking-wide mb-1.5 required-field">Apellido</label>
+          <input x-model="formNuevoUsuario.apellido" type="text" class="inp" placeholder="Alcántara Alfaro" @input="formNuevoUsuario.apellido = formFiltrarNombre(formNuevoUsuario.apellido)">
+          <p x-show="errorApellidoCrear" x-text="errorApellidoCrear" class="text-xs text-red-500 mt-1"></p>
+        </div>
+        <div class="col-span-2">
+          <label class="block text-xs font-semibold text-ink-500 uppercase tracking-wide mb-1.5 required-field">Nombre de usuario</label>
+          <input x-model="formNuevoUsuario.username" type="text" class="inp" placeholder="Usuario123" @input="formNuevoUsuario.username = formFiltrarUsername(formNuevoUsuario.username)">
+          <p x-show="errorUsernameCrear" x-text="errorUsernameCrear" class="text-xs text-red-500 mt-1"></p>
+        </div>
+        <div class="col-span-2">
+          <label class="block text-xs font-semibold text-ink-500 uppercase tracking-wide mb-1.5 required-field">Correo electrónico</label>
+          <input x-model="formNuevoUsuario.email" type="email" class="inp" placeholder="correo@gmail.com">
+          <p x-show="errorEmailCrear" x-text="errorEmailCrear" class="text-xs text-red-500 mt-1"></p>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-ink-500 uppercase tracking-wide mb-1.5">Teléfono <span class="text-ink-400 font-normal lowercase">(opcional)</span></label>
+          <input x-model="formNuevoUsuario.telefono" type="tel" class="inp" placeholder="+51 123 456 789" @focus="if(!formNuevoUsuario.telefono) formNuevoUsuario.telefono='+51 '" @input="formNuevoUsuario.telefono = formTelefonoFormat(formNuevoUsuario.telefono)" maxlength="17">
+          <p x-show="errorTelefonoCrear" x-text="errorTelefonoCrear" class="text-xs text-red-500 mt-1"></p>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-ink-500 uppercase tracking-wide mb-1.5 required-field">Rol</label>
+          <select x-model="formNuevoUsuario.rol" class="inp">
+            <option value="employee">Empleado</option>
+            <option value="admin">Admin</option>
+            <option value="client">Cliente</option>
+          </select>
+        </div>
+      </div>
+      <div class="bg-ink-50 rounded-xl p-3">
+        <p class="text-xs text-ink-400"><i class="fa-solid fa-info-circle mr-1"></i> La contraseña inicial será <strong>Cambiar123++</strong>. El usuario deberá cambiarla en su primer ingreso.</p>
+      </div>
+      <div class="flex gap-3">
+        <button @click="showModalCrearTrabajador = false" class="btn-ghost flex-1" aria-label="Cerrar modal">Cerrar</button>
+        <button @click="crearUsuario()" :disabled="loadingCrearUsuario" class="btn-primary flex-1 py-3 text-sm font-bold shadow-lg shadow-brand-200 disabled:opacity-50 disabled:cursor-not-allowed">
+          <template x-if="!loadingCrearUsuario"><span><i class="fa-solid fa-floppy-disk"></i> Guardar Usuario</span></template>
+          <template x-if="loadingCrearUsuario"><span><i class="fa-solid fa-spinner fa-spin"></i> Registrando...</span></template>
+        </button>
+        
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,160 @@
+<!-- VENTAS - LISTA DE VENTAS -->
+<div x-show="adminSection === 'lista-ventas'" class="dashboard-surface space-y-6">
+  <div class="grid grid-cols-2 xl:grid-cols-4 gap-3">
+    <div class="dashboard-metric-card fade-up p-3 min-h-[9.5rem] flex flex-col justify-between">
+      <div class="flex items-start justify-between gap-2">
+        <div class="space-y-1 min-w-0">
+          <p class="text-[10px] font-semibold uppercase tracking-[0.15em] text-ink-500">Ventas hoy</p>
+          <div class="text-2xl font-display font-800 text-ink-900" x-text="ventas.filter(v => v.estado === 'Completada').length"></div>
+        </div>
+        <div class="w-10 h-10 rounded-xl flex items-center justify-center text-white shrink-0" style="background:linear-gradient(135deg,#4c5bd0,#8ba3ff);">
+          <i class="fa-solid fa-receipt text-sm"></i>
+        </div>
+      </div>
+      <p class="text-xs text-ink-500">Cantidad de ventas del día</p>
+    </div>
+    <div class="dashboard-metric-card fade-up-d1 p-3 min-h-[9.5rem] flex flex-col justify-between">
+      <div class="flex items-start justify-between gap-2">
+        <div class="space-y-1 min-w-0">
+          <p class="text-[10px] font-semibold uppercase tracking-[0.15em] text-ink-500">Ventas semana</p>
+          <div class="text-2xl font-display font-800 text-ink-900" x-text="ventas.filter(v => v.estado === 'Completada').length"></div>
+        </div>
+        <div class="w-10 h-10 rounded-xl flex items-center justify-center text-white shrink-0" style="background:linear-gradient(135deg,#0f766e,#14b8a6);">
+          <i class="fa-solid fa-calendar-week text-sm"></i>
+        </div>
+      </div>
+      <p class="text-xs text-ink-500">Cantidad de ventas de la semana</p>
+    </div>
+    <div class="dashboard-metric-card fade-up-d2 p-3 min-h-[9.5rem] flex flex-col justify-between">
+      <div class="flex items-start justify-between gap-2">
+        <div class="space-y-1 min-w-0">
+          <p class="text-[10px] font-semibold uppercase tracking-[0.15em] text-ink-500">Ventas mes</p>
+          <div class="text-2xl font-display font-800 text-ink-900" x-text="ventas.filter(v => v.estado === 'Completada').length"></div>
+        </div>
+        <div class="w-10 h-10 rounded-xl flex items-center justify-center text-white shrink-0" style="background:linear-gradient(135deg,#f59e0b,#fbbf24);">
+          <i class="fa-solid fa-calendar-days text-sm"></i>
+        </div>
+      </div>
+      <p class="text-xs text-ink-500">Cantidad de ventas del mes</p>
+    </div>
+    <div class="dashboard-metric-card fade-up-d3 p-3 min-h-[9.5rem] flex flex-col justify-between">
+      <div class="flex items-start justify-between gap-2">
+        <div class="space-y-1 min-w-0">
+          <p class="text-[10px] font-semibold uppercase tracking-[0.15em] text-ink-500">Total ventas</p>
+          <div class="text-xl font-display font-800 text-ink-900" x-text="'S/ ' + ventas.reduce((s, v) => s + v.total, 0).toFixed(2)"></div>
+        </div>
+        <div class="w-10 h-10 rounded-xl flex items-center justify-center text-white shrink-0" style="background:linear-gradient(135deg,#7c3aed,#a78bfa);">
+          <i class="fa-solid fa-coins text-sm"></i>
+        </div>
+      </div>
+      <p class="text-xs text-ink-500">Monto total acumulado</p>
+    </div>
+  </div>
+
+  <!-- Filtros en una sola línea: Buscador largo (flex-1) y los otros dos compactos (w-auto) -->
+  <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full">
+    <div class="relative flex-1">
+      <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-ink-400 text-xs"></i>
+      <input x-model="busquedaVentaId" type="text" placeholder="Buscar por ID o codigo..." class="inp pl-9 w-full">
+    </div>
+    <input x-model="filtroFechaVenta" type="date" class="inp w-auto min-w-[140px]">
+    <select x-model="filtroCanalVenta" class="inp w-auto min-w-[150px]">
+      <option value="">Todos los canales</option>
+      <option value="Online">Online</option>
+      <option value="Presencial">Presencial</option>
+    </select>
+  </div>
+
+  <div class="dashboard-panel overflow-hidden fade-up">
+    <div class="px-6 py-5 border-b border-ink-200/60">
+      <h3 class="font-display font-700 text-ink-900">Historial de ventas</h3>
+      <p class="dashboard-panel-muted text-xs mt-1">Consulta rápida de movimientos recientes y su estado.</p>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full">
+        <thead>
+          <tr class="tbl-head">
+            <th class="text-left">ID</th>
+            <th class="text-left">Cliente</th>
+            <th class="text-left">Canal</th>
+            <th class="text-left">Items</th>
+            <!-- Distribución de la tabla: Más espacio a Total, menos a Método -->
+            <th class="text-left w-32 whitespace-nowrap">Total</th>
+            <th class="text-left w-24 whitespace-nowrap">Metodo</th>
+            <th class="text-left">Estado</th>
+            <th class="text-left">Fecha</th>
+            <th class="text-left">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <template x-for="venta in ventasPg.items" :key="venta.id">
+            <tr class="tbl-row">
+              <td class="font-mono text-xs text-ink-500" x-text="venta.boleta_code || '#V-' + venta.id"></td>
+              <td class="font-medium text-ink-800" x-text="venta.cliente"></td>
+              <td>
+                <span class="badge" :class="venta.canal === 'Online' ? 'bg-orange-100 text-orange-700' : 'bg-green-100 text-green-700'">
+                  <span class="cb-icon" style="display:none"><i :class="venta.canal === 'Online' ? 'fa-solid fa-globe' : 'fa-solid fa-store'"></i> </span>
+                  <span x-text="venta.canal"></span>
+                </span>
+              </td>
+              <td class="text-ink-500" x-text="venta.items"></td>
+              <td class="font-display font-700 text-ink-900" x-text="'S/ ' + venta.total.toFixed(2)"></td>
+
+              <!-- Columna de Método de pago corregida para Modo Accesibilidad -->
+              <td class="text-ink-500 text-sm whitespace-nowrap">
+                <span class="badge border-transparent bg-transparent p-0 text-ink-500 shadow-none" :class="paymentBadgeClass(venta.metodo_key || venta.metodo, venta.transfer_bank)">
+                  <span class="cb-icon" style="display:none">
+                    <i :class="
+                      (venta.metodo_key || venta.metodo) === 'yape' ? 'fa-solid fa-mobile-screen' : 
+                      (venta.metodo_key || venta.metodo) === 'plin' ? 'fa-solid fa-mobile-screen-button' : 
+                      (venta.metodo_key || venta.metodo) === 'cash' ? 'fa-solid fa-money-bill-wave' : 
+                      'fa-solid fa-building-columns'
+                    "></i>
+                  </span>
+                  <span x-text="paymentLabel(venta.metodo_key || venta.metodo, venta.transfer_bank)"></span>
+                </span>
+              </td>
+
+              <td>
+                <span class="badge" :class="adminVentaBadgeClass(venta.estado)">
+                  <span class="cb-icon" style="display:none"><i :class="statusIcon(venta.estado)"></i> </span>
+                  <span x-text="venta.estado"></span>
+                </span>
+              </td>
+              <td class="text-ink-400 text-xs" x-text="venta.fecha"></td>
+              <td>
+                <!-- Acciones con el botón Cancelar al final del todo -->
+                <div class="flex gap-1.5">
+                  <button @click="verVenta(venta)" class="btn-action-view" title="Ver detalle"><i class="fa-regular fa-eye text-xs"></i></button>
+                  <button @click="verBoleta(venta)" x-show="venta.boleta_code" class="btn-action-view" title="Ver Boleta" style="background:#eff6ff;border-color:#bfdbfe;color:#2563eb;"><i class="fa-solid fa-receipt text-xs"></i></button>
+                  <button @click="cancelarVenta(venta)" x-show="venta.estado !== 'Cancelada'" class="btn-action-cancel" title="Cancelar venta"><i class="fa-regular fa-circle-xmark text-xs"></i></button>
+                </div>
+              </td>
+            </tr>
+          </template>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Paginación -->
+    <div class="pagination" x-show="ventasPg.total > 0">
+      <p class="pagination-info">Mostrando <span x-text="((ventasPg.currentPage - 1) * PER_PAGE) + 1"></span>-<span x-text="Math.min(ventasPg.currentPage * PER_PAGE, ventasPg.total)"></span> de <span x-text="ventasPg.total"></span></p>
+      <div class="pagination-btns">
+        <button @click="ventasPage = 1" :disabled="ventasPg.currentPage === 1" class="page-btn"><i class="fa-solid fa-angles-left text-xs"></i></button>
+        <button @click="ventasPage = Math.max(1, ventasPage - 1)" :disabled="ventasPg.currentPage === 1" class="page-btn"><i class="fa-solid fa-chevron-left text-xs"></i></button>
+        <template x-for="p in getPageRange(ventasPg.currentPage, ventasPg.totalPages)" :key="'ventas-'+p">
+          <button x-show="p !== '...'" @click="ventasPage = p" :class="p === ventasPg.currentPage ? 'page-active' : ''" class="page-btn" x-text="p"></button>
+          <span x-show="p === '...'" class="page-ellipsis">...</span>
+        </template>
+        <button @click="ventasPage = Math.min(ventasPg.totalPages, ventasPage + 1)" :disabled="ventasPg.currentPage === ventasPg.totalPages" class="page-btn"><i class="fa-solid fa-chevron-right text-xs"></i></button>
+        <button @click="ventasPage = ventasPg.totalPages" :disabled="ventasPg.currentPage === ventasPg.totalPages" class="page-btn"><i class="fa-solid fa-angles-right text-xs"></i></button>
+      </div>
+    </div>
+
+    <div x-show="ventasPg.total === 0" class="px-6 py-12 text-center text-ink-400">
+      <i class="fa-solid fa-receipt text-4xl mb-3 inline-block"></i>
+      <p class="font-display font-600">No se encontraron ventas</p>
+    </div>
+  </div>
+</div>

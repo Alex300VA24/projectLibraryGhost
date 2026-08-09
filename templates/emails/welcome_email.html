@@ -1,0 +1,47 @@
+{% extends "emails/base_email.html" %}
+{% load static %}
+
+{% block email_title %}¡Bienvenido a {{ company_name }}!{% endblock %}
+
+{% block content %}
+<table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;">
+  <tr>
+    <td style="text-align:center;padding-bottom:24px;">
+      <h2 style="margin:0 0 8px;color:#1e3a5f;font-size:22px;font-weight:700;">¡Bienvenido, {{ user.first_name|default:user.username }}!</h2>
+      <p style="margin:0;color:#6b7280;font-size:15px;line-height:1.6;">Nos alegra mucho que te hayas registrado en <strong>{{ company_name }}</strong>.</p>
+    </td>
+  </tr>
+  <tr>
+    <td style="padding:20px 0;">
+      <table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;background-color:#f0f9ff;border-radius:12px;padding:20px;">
+        <tr>
+          <td>
+            <p style="margin:0 0 12px;color:#1e3a5f;font-size:15px;line-height:1.6;">
+              Ahora puedes disfrutar de todos nuestros beneficios:
+            </p>
+            <ul style="margin:0;padding-left:20px;color:#4b5563;font-size:14px;line-height:2;">
+              <li>Realizar pedidos online desde la comodidad de tu hogar</li>
+              <li>Elegir entre múltiples métodos de pago</li>
+              <li>Recibir notificaciones sobre el estado de tus pedidos</li>
+            </ul>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <td style="text-align:center;padding:24px 0 8px;">
+      <a href="{{ protocol|default:'https' }}://{{ domain|default:'localhost' }}/catalogo/"
+         style="display:inline-block;background:linear-gradient(135deg, #1e3a5f 0%, #2a4f7f 100%);color:#ffffff;text-decoration:none;padding:14px 36px;border-radius:10px;font-size:15px;font-weight:600;">
+        Explorar productos
+      </a>
+    </td>
+  </tr>
+  <tr>
+    <td style="text-align:center;padding-top:20px;">
+      <p style="margin:0;color:#9ca3af;font-size:13px;">¡Gracias por preferirnos!</p>
+      <p style="margin:4px 0 0;color:#6b7280;font-size:14px;font-weight:600;">El equipo de {{ company_name }}</p>
+    </td>
+  </tr>
+</table>
+{% endblock %}

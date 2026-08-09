@@ -1,0 +1,112 @@
+{% extends 'core/base.html' %}
+{% load static %}
+{% load status_tags %}
+
+{% block title %}Mis Pedidos — Libreria Ghostitzer{% endblock %}
+
+{% block content %}
+<div class="ambient-shell min-h-screen">
+{% include 'core/_navbar.html' %}
+<main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10" x-data="orderPage()" @cancel-order="confirmCancel($event.detail.id)">
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+    <div>
+      <h1 class="font-display font-800 text-2xl text-ink-900">Mis Pedidos</h1>
+      <p class="text-ink-400 text-sm">Historial de tus órdenes</p>
+      <p class="text-xs text-ink-400 mt-1">
+        Cancelaciones disponibles este mes:
+        <span class="font-semibold {% if remaining_cancellations > 0 %}text-green-600{% else %}text-red-600{% endif %}">
+          {{ remaining_cancellations }} / 3
+        </span>
+      </p>
+    </div>
+    <a href="{% url 'catalog' %}" class="btn-primary text-sm w-full sm:w-auto justify-center"><i class="fa-solid fa-cart-shopping"></i> Seguir comprando</a>
+  </div>
+
+  {% if orders %}
+    <div class="space-y-4">
+      {% for order in orders %}
+        <div x-data="{ open: false }" class="dashboard-panel p-3 sm:p-5 prod-card-catalog stagger-in"
+             style="transition-delay:{{ forloop.counter0|add:'60' }}ms">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
+                <h3 class="font-display font-700 text-ink-900 text-sm sm:text-base">Pedido {{ forloop.counter }}</h3>
+                {% status_badge order.get_status_display 'admin_order' %}
+              </div>
+              <p class="text-xs text-ink-400 mt-1">N°{{ order.order_number|default:order.id }} · {{ order.created_at|date:'d/m/Y H:i' }} · {{ order.items.count }} producto(s)</p>
+              {% if order.boleta_code %}
+                <div class="flex items-center gap-2 mt-1 flex-wrap">
+                  <span class="text-xs font-mono text-ink-500">{{ order.boleta_code }}</span>
+                  {% if order.is_paid %}<span class="badge bg-green-100 text-green-700 text-[10px]"><span class="cb-icon" style="display:none"><i class="fa-solid fa-check-circle"></i> </span>Pagado</span>{% endif %}
+                  {% if order.payment_method %}<span class="badge bg-blue-100 text-blue-700 text-[10px]"><span class="cb-icon" style="display:none"><i class="fa-solid fa-money-bill-wave"></i> </span>{{ order.get_payment_method_display }}</span>{% endif %}
+                </div>
+              {% endif %}
+            </div>
+            <div class="flex items-center justify-between sm:justify-end sm:flex-col sm:items-end gap-2">
+              <p class="price-catalog text-lg"><span class="price-sym">S/</span>{{ order.total|floatformat:2 }}</p>
+              <div class="flex items-center gap-2 flex-wrap">
+                <a href="{% url 'boleta' order.boleta_code %}" class="btn-ghost text-xs py-1.5 px-3"><i class="fa-regular fa-eye"></i> <span class="hidden sm:inline">Ver boleta</span><span class="sm:hidden">Boleta</span></a>
+                <button @click="open = !open" class="btn-ghost text-xs py-1.5 px-3 flex items-center gap-1">
+                  <i class="fa-solid" :class="open ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+                  <span x-text="open ? 'Ocultar' : 'Desplegar'"></span>
+                </button>
+                {% if order.status == 'pending' %}
+                  {% if remaining_cancellations > 0 %}
+                    <button @click="$dispatch('cancel-order', { id: {{ order.id }} })" class="btn-danger text-xs py-1.5 px-3"><i class="fa-solid fa-xmark"></i> Cancelar</button>
+                  {% else %}
+                    <button disabled class="btn-danger text-xs py-1.5 px-3 opacity-50 cursor-not-allowed"><i class="fa-solid fa-xmark"></i> Cancelar</button>
+                  {% endif %}
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          <div x-show="open" x-transition class="grid gap-3 mt-4">
+            {% for item in order.items.all %}
+              <div class="flex items-center gap-3 bg-ink-50 rounded-2xl p-3">
+                <div class="w-14 h-14 rounded-xl overflow-hidden bg-white border border-ink-100 flex items-center justify-center">
+                  {% if item.product and item.product.image %}
+                    <img src="{{ item.product.image.url }}" alt="{{ item.product_name }}" class="w-full h-full object-cover">
+                  {% else %}
+                    <i class="fa-solid fa-box text-ink-300 text-xl"></i>
+                  {% endif %}
+                </div>
+                <div class="min-w-0">
+                  <p class="font-medium text-ink-900 text-sm truncate">{{ item.product_name }}</p>
+                  <p class="text-xs text-ink-500">{{ item.quantity }} x S/ {{ item.price|floatformat:2 }}</p>
+                </div>
+                <p class="price-catalog text-sm ml-auto"><span class="price-sym">S/</span>{{ item.subtotal|floatformat:2 }}</p>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="text-center py-16">
+      <i class="fa-regular fa-clock text-ink-300 text-5xl mb-4"></i>
+      <h3 class="font-display font-700 text-lg text-ink-600">No tienes pedidos aún</h3>
+      <p class="text-ink-400 mt-1 text-sm">Realiza tu primera compra en el catálogo.</p>
+      <a href="{% url 'catalog' %}" class="btn-primary mt-4 text-sm inline-flex items-center gap-2"> Ir al catálogo <i class="fa-solid fa-arrow-right"></i></a>
+    </div>
+  {% endif %}
+
+  {% include 'core/_confirm_modal.html' %}
+</main>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  var els = document.querySelectorAll('.stagger-in');
+  els.forEach(function(el, i) {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(20px) scale(.98)';
+    setTimeout(function() {
+      el.style.opacity = '1';
+      el.style.transform = 'translateY(0) scale(1)';
+    }, 60 + i * 50);
+  });
+});
+</script>
+{% endblock %}

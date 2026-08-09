@@ -1,0 +1,55 @@
+<div x-show="showModalEditarUsuario" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-bg" @click.self="showModalEditarUsuario = false" @keydown.escape.window="showModalEditarUsuario = false" role="dialog" aria-modal="true" aria-labelledby="modal-editar-usuario" style="display:none">
+  <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto" @click.stop>
+    <div class="flex items-center justify-between p-5 border-b border-ink-100">
+      <h3 id="modal-editar-usuario" class="text-2xl font-display font-700 text-ink-900">Editar Usuario</h3>
+      <button @click="showModalEditarUsuario = false" class="w-8 h-8 rounded-lg hover:bg-ink-100 flex items-center justify-center text-ink-400" aria-label="Cerrar modal"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="p-5 space-y-4" x-show="usuarioEditar">
+      <div class="bg-blue-50 border border-blue-200 rounded-xl p-3 flex items-start gap-2">
+        <i class="fa-solid fa-circle-info text-blue-500 mt-0.5"></i>
+        <p class="text-sm text-blue-700">Los campos marcados con <span class="text-red-500 font-semibold">*</span> son obligatorios</p>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-semibold text-ink-500 uppercase tracking-wide mb-1.5 required-field">Nombre</label>
+          <input x-model="usuarioEditar.nombre" type="text" class="inp" placeholder="Nombres" @input="usuarioEditar.nombre = formFiltrarNombre(usuarioEditar.nombre)">
+          <p x-show="errorNombreEditar" x-text="errorNombreEditar" class="text-xs text-red-500 mt-1"></p>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-ink-500 uppercase tracking-wide mb-1.5 required-field">Apellido</label>
+          <input x-model="usuarioEditar.apellido" type="text" class="inp" placeholder="Apellidos" @input="usuarioEditar.apellido = formFiltrarNombre(usuarioEditar.apellido)">
+          <p x-show="errorApellidoEditar" x-text="errorApellidoEditar" class="text-xs text-red-500 mt-1"></p>
+        </div>
+        <div class="col-span-2">
+          <label class="block text-xs font-semibold text-ink-500 uppercase tracking-wide mb-1.5 required-field">Nombre de usuario</label>
+          <input x-model="usuarioEditar.username" type="text" class="inp" placeholder="usuario123" @input="usuarioEditar.username = formFiltrarUsername(usuarioEditar.username)">
+          <p x-show="errorUsernameEditar" x-text="errorUsernameEditar" class="text-xs text-red-500 mt-1"></p>
+        </div>
+        <div class="col-span-2">
+          <label class="block text-xs font-semibold text-ink-500 uppercase tracking-wide mb-1.5 required-field">Correo electrónico</label>
+          <input x-model="usuarioEditar.email" type="email" class="inp" placeholder="correo@gmail.com">
+          <p x-show="errorEmailEditar" x-text="errorEmailEditar" class="text-xs text-red-500 mt-1"></p>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-ink-500 uppercase tracking-wide mb-1.5">Teléfono <span class="text-ink-400 font-normal lowercase">(opcional)</span></label>
+          <input x-model="usuarioEditar.telefono" type="tel" class="inp" placeholder="+51 999 999 999" @focus="if(!usuarioEditar.telefono) usuarioEditar.telefono='+51 '" @input="usuarioEditar.telefono = formTelefonoFormat(usuarioEditar.telefono)" maxlength="17">
+          <p x-show="errorTelefonoEditar" x-text="errorTelefonoEditar" class="text-xs text-red-500 mt-1"></p>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-ink-500 uppercase tracking-wide mb-1.5 required-field">Rol</label>
+          <select x-model="usuarioEditar.rol" class="inp">
+            <option value="employee">Empleado</option>
+            <option value="admin">Admin</option>
+            <option value="client">Cliente</option>
+          </select>
+        </div>
+      </div>
+      <button @click="restablecerContrasena()" class="w-full text-sm text-brand-600 hover:text-brand-700 font-semibold py-2 border border-brand-200 rounded-xl hover:bg-brand-50 transition-colors"><i class="fa-solid fa-key mr-1"></i> Restablecer contraseña a "Cambiar123++"</button>
+      <div class="flex gap-3">
+        <button @click="showModalEditarUsuario = false" class="btn-ghost flex-1" aria-label="Cerrar modal">Cerrar</button>
+        <button @click="guardarUsuario()" class="btn-primary flex-1 py-3 text-sm font-bold shadow-lg shadow-brand-200"><i class="fa-solid fa-floppy-disk"></i> Guardar Cambios</button>
+        
+      </div>
+    </div>
+  </div>
+</div>

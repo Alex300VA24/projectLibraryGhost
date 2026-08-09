@@ -1,0 +1,125 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Notificaciones — Libreria Ghostitzer{% endblock %}
+
+{% block content %}
+<div class="ambient-shell min-h-screen">
+{% include 'core/_navbar.html' %}
+<main class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+  <div class="flex items-center justify-between mb-8">
+    <div class="flex items-center gap-4">
+      <div class="dashboard-metric-icon text-white" style="background:linear-gradient(135deg,#4c5bd0,#8ba3ff);">
+        <i class="fa-solid fa-bell text-lg"></i>
+      </div>
+      <div>
+        <h1 class="font-display font-800 text-2xl text-ink-900">Notificaciones</h1>
+        <p class="text-ink-400 text-sm">{% if unread_count > 0 %}Tienes {{ unread_count }} sin leer{% else %}Estás al día{% endif %}</p>
+      </div>
+    </div>
+    {% if unread_count > 0 %}
+    <button id="btn-marcar-todas" class="btn-ghost text-sm">
+      <i class="fa-solid fa-check-double mr-1"></i> Marcar todas leídas
+    </button>
+    {% endif %}
+  </div>
+
+  {% if notifications %}
+  <div class="space-y-3" id="notif-list">
+    {% for n in notifications %}
+    <div class="dashboard-panel p-4 prod-card-catalog stagger-in notif-item" style="transition-delay:{{ forloop.counter0|add:'60' }}ms" data-id="{{ n.id }}" data-read="{{ n.is_read|yesno:'true,false' }}">
+      <div class="flex items-start gap-4">
+        <div class="w-3 h-3 rounded-full mt-1.5 flex-shrink-0 notif-dot {% if not n.is_read %}bg-blue-500{% else %}bg-ink-200{% endif %}"></div>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-start justify-between gap-4">
+            <div class="min-w-0">
+              <h3 class="text-sm font-semibold text-ink-800">{{ n.title }}</h3>
+              <p class="text-sm text-ink-500 mt-1">{{ n.message }}</p>
+            </div>
+            <button type="button" class="btn-marcar-leida text-xs font-semibold flex items-center gap-1 flex-shrink-0 {% if n.is_read %}text-green-600{% else %}text-ink-400 hover:text-ink-600{% endif %}" data-notif-id="{{ n.id }}">
+              <i class="{% if n.is_read %}fa-solid fa-check{% else %}fa-regular fa-circle{% endif %}"></i>
+              <span>{% if n.is_read %}Revisada{% else %}No revisada{% endif %}</span>
+            </button>
+          </div>
+          <p class="text-xs text-ink-400 mt-3">{{ n.created_at|date:"d/m/Y H:i" }}</p>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="dashboard-panel p-12 text-center">
+    <i class="fa-regular fa-bell-slash text-4xl text-ink-200 mb-4"></i>
+    <p class="text-ink-500">No tienes notificaciones.</p>
+  </div>
+  {% endif %}
+
+  <div class="mt-8 text-center">
+    <a href="{% url 'home' %}" class="btn-ghost text-sm"><i class="fa-solid fa-arrow-left mr-1"></i> Volver al inicio</a>
+  </div>
+</main>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+
+  document.querySelectorAll('.btn-marcar-leida').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const notifId = this.dataset.notifId;
+      const item = this.closest('.notif-item');
+      const dot = item.querySelector('.notif-dot');
+      fetch(`/dashboard/api/notificaciones/${notifId}/leer/`, {
+        method: 'POST',
+        headers: { 'X-CSRFToken': csrfToken }
+      }).then(r => r.json()).then(d => {
+        if (d.success) {
+          this.classList.remove('text-ink-400', 'hover:text-ink-600');
+          this.classList.add('text-green-600');
+          this.innerHTML = '<i class="fa-solid fa-check"></i><span>Revisada</span>';
+          dot.classList.remove('bg-blue-500');
+          dot.classList.add('bg-ink-200');
+          item.dataset.read = 'true';
+        }
+      }).catch(() => {});
+    });
+  });
+
+  const btnTodas = document.getElementById('btn-marcar-todas');
+  if (btnTodas) {
+    btnTodas.addEventListener('click', function() {
+      fetch('/dashboard/api/notificaciones/leer-todas/', {
+        method: 'POST',
+        headers: { 'X-CSRFToken': csrfToken }
+      }).then(r => r.json()).then(d => {
+        if (d.success) {
+          document.querySelectorAll('.notif-item').forEach(item => {
+            item.dataset.read = 'true';
+            const dot = item.querySelector('.notif-dot');
+            dot.classList.remove('bg-blue-500');
+            dot.classList.add('bg-ink-200');
+            const btn = item.querySelector('.btn-marcar-leida');
+            btn.classList.remove('text-ink-400', 'hover:text-ink-600');
+            btn.classList.add('text-green-600');
+            btn.innerHTML = '<i class="fa-solid fa-check"></i><span>Revisada</span>';
+          });
+          const subtitle = document.querySelector('p.text-ink-400.text-sm');
+          if (subtitle) subtitle.textContent = 'Estás al día';
+          btnTodas.style.display = 'none';
+        }
+      }).catch(() => {});
+    });
+  }
+
+  var staggers = document.querySelectorAll('.stagger-in');
+  staggers.forEach(function(el, i) {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(20px) scale(.98)';
+    setTimeout(function() {
+      el.style.opacity = '1';
+      el.style.transform = 'translateY(0) scale(1)';
+    }, 60 + i * 50);
+  });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,139 @@
+<div x-show="showModalPago" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-bg" @click.self="pagoStep === 1 ? showModalPago = false : null" @keydown.escape.window="showModalPago = false" role="dialog" aria-modal="true" aria-labelledby="modal-pago-venta" style="display:none">
+  <div class="bg-white rounded-2xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto modal-inner-scroll" @click.stop>
+
+    <!-- STEP 1: Payment Method Selection -->
+    <template x-if="pagoStep === 1">
+      <div>
+        <div class="flex items-center justify-between p-5 border-b border-ink-100">
+          <h3 id="modal-pago-venta" class="text-2xl font-display font-700 text-ink-900">Pago de Venta</h3>
+          <button @click="showModalPago = false" class="w-8 h-8 rounded-lg hover:bg-ink-100 flex items-center justify-center text-ink-400" aria-label="Cerrar modal"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="p-5 space-y-4">
+          <div class="bg-ink-50 rounded-xl p-4">
+            <p class="text-xs text-ink-400 mb-1">Total a pagar</p>
+            <p class="text-3xl font-display font-800 text-ink-900" x-text="'S/ ' + ventaTotal.toFixed(2)"></p>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-ink-500 uppercase tracking-wide mb-2">Metodo de pago</label>
+            <div class="grid grid-cols-2 gap-2">
+              <button @click="metodoPago = 'Efectivo'" :class="metodoPago === 'Efectivo' ? 'bg-brand-600 text-white shadow-lg' : 'bg-white border border-ink-200 text-ink-700 hover:border-brand-400'" class="flex items-center gap-2 px-4 py-3 rounded-xl font-semibold text-sm transition-all">
+                <i class="fa-solid fa-money-bill-wave"></i> Efectivo
+              </button>
+              <button @click="metodoPago = 'Yape'" :class="metodoPago === 'Yape' ? 'bg-purple-600 text-white shadow-lg' : 'bg-white border border-ink-200 text-ink-700 hover:border-purple-400'" class="flex items-center gap-2 px-4 py-3 rounded-xl font-semibold text-sm transition-all">
+                <i class="fa-solid fa-mobile-screen-button"></i> Yape
+              </button>
+              <button @click="metodoPago = 'Plin'" :class="metodoPago === 'Plin' ? 'bg-blue-500 text-white shadow-lg' : 'bg-white border border-ink-200 text-ink-700 hover:border-blue-400'" class="flex items-center gap-2 px-4 py-3 rounded-xl font-semibold text-sm transition-all">
+                <i class="fa-solid fa-wallet"></i> Plin
+              </button>
+              <button @click="metodoPago = 'Transferencia'" :class="metodoPago === 'Transferencia' ? 'bg-green-600 text-white shadow-lg' : 'bg-white border border-ink-200 text-ink-700 hover:border-green-400'" class="flex items-center gap-2 px-4 py-3 rounded-xl font-semibold text-sm transition-all">
+                <i class="fa-solid fa-university"></i> Transferencia
+              </button>
+            </div>
+          </div>
+          <div x-show="metodoPago === 'Efectivo'" class="space-y-3">
+            <div>
+              <label class="block text-xs font-semibold text-ink-500 uppercase tracking-wide mb-1.5">Monto recibido</label>
+              <input x-model.number="montoRecibido" type="number" class="inp text-lg" placeholder="0.00">
+            </div>
+            <div x-show="montoRecibido > 0" class="bg-green-50 rounded-xl p-3 border border-green-200">
+              <div class="flex justify-between items-center">
+                <span class="text-sm text-green-700">Cambio</span>
+                <span class="font-display font-800 text-green-700 text-xl" x-text="'S/ ' + Math.max(0, montoRecibido - ventaTotal).toFixed(2)"></span>
+              </div>
+              <p x-show="montoRecibido < ventaTotal" class="text-xs text-red-500 mt-1"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Monto insuficiente</p>
+            </div>
+          </div>
+          <div class="flex gap-3">
+            <button @click="showModalPago = false" class="btn-ghost flex-1">Cerrar</button>
+            <button @click="procesarPago()" class="btn-primary flex-1 py-3 text-sm font-bold shadow-lg shadow-brand-200" :disabled="metodoPago === 'Efectivo' && montoRecibido < ventaTotal"><i class="fa-solid fa-money-bills"></i> Realizar Pago</button>
+          </div>
+        </div>
+      </div>
+    </template>
+
+    <!-- STEP 2: Waiting for Payment (QR + Polling) -->
+    <template x-if="pagoStep === 2">
+      <div>
+        <div class="flex items-center justify-between p-5 border-b border-ink-100">
+          <h3 class="text-2xl font-display font-700 text-ink-900">Esperando Pago</h3>
+          <button @click="cancelarPago()" class="w-8 h-8 rounded-lg hover:bg-ink-100 flex items-center justify-center text-ink-400" aria-label="Cerrar modal"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="p-5 space-y-4">
+          <div class="bg-ink-50 rounded-xl p-4 text-center">
+            <div class="flex items-center justify-center gap-3 mb-2">
+              <div class="w-10 h-10 rounded-full flex items-center justify-center"
+                   :class="metodoPago === 'Yape' ? 'bg-purple-100' : metodoPago === 'Plin' ? 'bg-blue-100' : 'bg-green-100'">
+                <i class="fa-solid text-lg"
+                   :class="metodoPago === 'Yape' ? 'fa-mobile-screen-button text-purple-600' : metodoPago === 'Plin' ? 'fa-wallet text-blue-600' : 'fa-university text-green-600'"></i>
+              </div>
+              <span class="font-display font-700 text-ink-900 text-lg" x-text="metodoPago"></span>
+            </div>
+            <p class="text-xs text-ink-400 mb-1">Total a pagar</p>
+            <p class="text-3xl font-display font-800 text-ink-900" x-text="'S/ ' + ventaTotal.toFixed(2)"></p>
+          </div>
+
+          <!-- QR Code (Yape / Plin) -->
+          <template x-if="metodoPago === 'Yape' || metodoPago === 'Plin'">
+            <div class="bg-white rounded-xl border border-ink-200 p-4 text-center">
+              <p class="text-sm text-ink-500 mb-3">Escanea el codigo QR con tu aplicacion</p>
+              <div class="bg-gray-50 rounded-xl p-4 flex items-center justify-center">
+                <div class="w-48 h-48 bg-white border border-ink-200 rounded-lg flex items-center justify-center" x-show="pagoQRB64">
+                  <img :src="'data:image/png;base64,' + pagoQRB64" alt="QR Pago" class="w-full h-full object-contain p-2">
+                </div>
+                <div class="w-48 h-48 bg-white border border-ink-200 rounded-lg flex items-center justify-center" x-show="!pagoQRB64">
+                  <i class="fa-solid fa-qrcode text-ink-300 text-6xl"></i>
+                </div>
+              </div>
+            </div>
+          </template>
+
+          <!-- Transfer Data (Transferencia) -->
+          <template x-if="metodoPago === 'Transferencia'">
+            <div class="bg-white rounded-xl border border-ink-200 p-4">
+              <p class="text-xs text-ink-400 uppercase tracking-wide font-semibold mb-3">Datos de transferencia</p>
+              <div class="space-y-2 text-sm">
+                <div class="flex justify-between"><span class="text-ink-500">Banco</span><span class="font-semibold text-ink-800">BCP</span></div>
+                <div class="flex justify-between"><span class="text-ink-500">Cuenta</span><span class="font-mono text-ink-800">123-456-789</span></div>
+                <div class="flex justify-between"><span class="text-ink-500">CCI</span><span class="font-mono text-ink-800">002-123-45678901234-56</span></div>
+                <div class="flex justify-between"><span class="text-ink-500">Titular</span><span class="font-semibold text-ink-800">Libreria Ghostitzer SAC</span></div>
+              </div>
+              <p class="text-xs text-ink-400 text-center mt-3">Realiza la transferencia por el monto exacto</p>
+            </div>
+          </template>
+
+          <!-- Payment Status -->
+          <div class="text-center">
+            <div class="inline-flex items-center gap-2 px-4 py-2 bg-yellow-50 rounded-full">
+              <div class="w-2 h-2 rounded-full bg-yellow-500 animate-pulse"></div>
+              <span class="text-sm text-yellow-700 font-medium">Esperando pago...</span>
+            </div>
+            <p class="text-xs text-ink-400 mt-2">El pago se detectara automaticamente</p>
+          </div>
+
+          <!-- Cancel -->
+          <button @click="cancelarPago()" class="btn-ghost w-full py-3 text-sm">
+            <i class="fa-solid fa-xmark mr-1"></i> Cancelar pago
+          </button>
+        </div>
+      </div>
+    </template>
+
+    <!-- STEP 3: Payment Success -->
+    <template x-if="pagoStep === 3">
+      <div class="p-6 text-center">
+        <div class="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
+          <i class="fa-solid fa-circle-check text-green-500 text-3xl"></i>
+        </div>
+        <h3 class="text-2xl font-display font-700 text-ink-900 mb-2">Pago Confirmado</h3>
+        <p class="text-ink-500 text-sm mb-4">El pago se recibio correctamente.</p>
+        <div class="bg-ink-50 rounded-xl p-4 mb-4 text-left space-y-2">
+          <div class="flex justify-between text-sm"><span class="text-ink-500">Venta</span><span class="font-mono font-semibold" x-text="pagoBoletaCode || '#V-' + (pagoOrderId || '')"></span></div>
+          <div class="flex justify-between text-sm"><span class="text-ink-500">Metodo</span><span class="badge bg-blue-100 text-blue-700" x-text="metodoPago"></span></div>
+          <div class="flex justify-between text-sm border-t border-ink-200 pt-2"><span class="text-ink-900 font-semibold">Total</span><span class="font-display font-800 text-brand-600" x-text="'S/ ' + ventaTotal.toFixed(2)"></span></div>
+        </div>
+        <button @click="cerrarPagoExitoso()" class="btn-primary w-full py-3 text-sm font-bold">Finalizar</button>
+      </div>
+    </template>
+
+  </div>
+</div>

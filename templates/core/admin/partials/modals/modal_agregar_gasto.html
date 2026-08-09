@@ -1,0 +1,114 @@
+<div x-show="showModalAgregarGasto" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-bg" @click.self="showModalAgregarGasto = false" @keydown.escape.window="showModalAgregarGasto = false" role="dialog" aria-modal="true" aria-labelledby="modal-registrar-gasto" style="display:none">
+  <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto modal-inner-scroll" @click.stop>
+    <div class="flex items-center justify-between p-5 border-b border-ink-100">
+      <h3 id="modal-registrar-gasto" class="text-2xl font-display font-700 text-ink-900" x-text="formGasto.id ? 'Editar Gasto' : 'Registrar Gasto'"></h3>
+      <button @click="showModalAgregarGasto = false" class="w-8 h-8 rounded-lg hover:bg-ink-100 flex items-center justify-center text-ink-400" aria-label="Cerrar modal"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="p-5 space-y-4">
+      <div class="bg-blue-50 border border-blue-200 rounded-xl p-3 flex items-start gap-2">
+        <i class="fa-solid fa-circle-info text-blue-500 mt-0.5"></i>
+        <p class="text-sm text-blue-700">Los campos marcados con <span class="text-red-500 font-semibold">*</span> son obligatorios</p>
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-ink-500 uppercase tracking-wide mb-1.5 required-field">Concepto</label>
+        <input x-model="formGasto.concepto" type="text" class="inp" placeholder="Concepto del gasto" @input="formGasto.concepto = formFiltrarConcepto(formGasto.concepto); errorConceptoGasto = ''">
+        <p x-show="errorConceptoGasto" x-text="errorConceptoGasto" class="text-xs text-red-500 mt-1"></p>
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-semibold text-ink-500 uppercase tracking-wide mb-1.5 required-field">Tipo</label>
+          <select x-model="formGasto.tipo" class="inp" @change="errorTipoGasto = ''">
+            <option value="Fijo">Fijo</option>
+            <option value="Variable">Variable</option>
+            <option value="Operativo">Operativo</option>
+            <option value="Mantenimiento">Mantenimiento</option>
+          </select>
+          <p x-show="errorTipoGasto" x-text="errorTipoGasto" class="text-xs text-red-500 mt-1"></p>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-ink-500 uppercase tracking-wide mb-1.5 required-field">Monto (S/)</label>
+          <input x-model.number="formGasto.monto" type="number" step="0.01" class="inp" placeholder="0.00" @input="errorMontoGasto = ''">
+          <p x-show="errorMontoGasto" x-text="errorMontoGasto" class="text-xs text-red-500 mt-1"></p>
+        </div>
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-ink-500 uppercase tracking-wide mb-1.5 required-field">Fecha</label>
+        <input x-model="formGasto.fecha" type="date" class="inp" @change="errorFechaGasto = ''">
+        <p x-show="errorFechaGasto" x-text="errorFechaGasto" class="text-xs text-red-500 mt-1"></p>
+      </div>
+      
+      <!-- Comprobante -->
+      <div>
+        <label class="block text-xs font-semibold text-ink-500 uppercase tracking-wide mb-1.5">Comprobante <span class="text-ink-400 font-normal lowercase">(opcional)</span></label>
+
+        <!-- Archivo cargado actualmente (modo edición) -->
+        <template x-if="formGasto.id && formGasto._comprobanteUrl && !formGasto.comprobanteFile">
+          <div class="comprobante-loaded mb-2">
+            <div class="cl-icon" :class="formGasto._comprobanteUrl.match(/\.pdf$/i) ? 'pdf' : ''">
+              <i class="fa-solid" :class="formGasto._comprobanteUrl.match(/\.pdf$/i) ? 'fa-file-pdf' : 'fa-file-image'"></i>
+            </div>
+            <div class="cl-meta">
+              <p class="cl-name" x-text="formGasto.comprobante_nombre || 'Comprobante adjunto'"></p>
+              <p class="cl-sub">Archivo cargado — haz clic abajo para reemplazar</p>
+            </div>
+            <a :href="formGasto._comprobanteUrl" target="_blank"
+               class="flex-shrink-0 w-8 h-8 rounded-lg bg-white border border-sky-200 flex items-center justify-center text-sky-500 hover:text-sky-700 hover:border-sky-400 transition-colors"
+               title="Ver archivo">
+              <i class="fa-solid fa-external-link-alt text-xs"></i>
+            </a>
+            <button @click.prevent="formGasto.comprobanteFile = null; formGasto.comprobantePreview = null; formGasto._comprobanteUrl = null; formGasto.comprobanteClear = true"
+                    class="flex-shrink-0 w-8 h-8 rounded-lg bg-white border border-red-200 flex items-center justify-center text-red-400 hover:text-red-600 hover:border-red-400 transition-colors"
+                    title="Quitar comprobante">
+              <i class="fa-solid fa-trash-can text-xs"></i>
+            </button>
+          </div>
+        </template>
+
+        <label class="flex items-center gap-3 px-4 py-3 rounded-xl border-2 border-dashed border-ink-300 hover:border-brand-400 cursor-pointer transition-colors bg-ink-50/50">
+          <div class="w-10 h-10 rounded-lg bg-brand-100 flex items-center justify-center flex-shrink-0">
+            <i class="fa-solid fa-upload text-brand-600"></i>
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-medium text-ink-700 truncate"
+               x-text="formGasto.comprobanteFile?.name || (formGasto.id && formGasto._comprobanteUrl ? 'Reemplazar archivo...' : 'Subir imagen, PDF o Word')"></p>
+            <p class="text-xs text-ink-400" x-show="!formGasto.comprobanteFile">JPG, PNG, PDF, DOC, DOCX</p>
+          </div>
+          <template x-if="formGasto.comprobanteFile">
+            <button @click.prevent="formGasto.comprobanteFile = null; formGasto.comprobantePreview = formGasto._comprobanteUrl || null" class="w-7 h-7 rounded-full hover:bg-red-100 flex items-center justify-center text-red-400 hover:text-red-600">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </template>
+          <input type="file" accept="image/*,.pdf,.doc,.docx" @change="handleGastoComprobante($event)" class="hidden">
+        </label>
+
+        <!-- Preview de nuevo archivo seleccionado -->
+        <template x-if="formGasto.comprobanteFile && formGasto.comprobantePreview">
+          <div class="comprobante-loaded mt-2">
+            <template x-if="formGasto.comprobantePreview.startsWith('data:image')">
+              <img :src="formGasto.comprobantePreview" class="w-9 h-9 rounded-lg object-cover flex-shrink-0">
+            </template>
+            <template x-if="!formGasto.comprobantePreview.startsWith('data:image')">
+              <div class="cl-icon pdf"><i class="fa-solid fa-file-pdf"></i></div>
+            </template>
+            <div class="cl-meta">
+              <p class="cl-name" x-text="formGasto.comprobanteFile?.name"></p>
+              <p class="cl-sub">Listo para subir</p>
+            </div>
+          </div>
+        </template>
+      </div>
+      <div><label class="block text-xs font-semibold text-ink-500 uppercase tracking-wide mb-1.5">Descripcion <span class="text-ink-400 font-normal lowercase">(opcional)</span></label><textarea x-model="formGasto.descripcion" class="inp" rows="2" placeholder="Descripcion..."></textarea></div>
+      <div x-show="formGasto.id && isAdmin">
+        <!-- <button @click="showModalAgregarGasto = false; confirmarEliminarGasto(formGasto)" class="w-full text-sm text-red-500 hover:text-red-700 font-semibold py-2 border border-red-200 rounded-xl hover:bg-red-50 transition-colors"><i class="fa-solid fa-trash-can mr-1"></i> Eliminar este gasto</button>-->
+      </div>
+      <div class="flex gap-3">
+        <button @click="showModalAgregarGasto = false" class="btn-ghost flex-1" aria-label="Cerrar modal">Cerrar</button>
+        <button @click="guardarGasto()" class="btn-primary flex-1 py-3 text-sm font-bold shadow-lg shadow-brand-200">
+            <i class="fa-solid fa-floppy-disk"></i>
+            <span x-text="formGasto.id ? 'Guardar Cambios' : 'Guardar Gasto'"></span>
+        </button>
+        
+      </div>
+    </div>
+  </div>
+</div>

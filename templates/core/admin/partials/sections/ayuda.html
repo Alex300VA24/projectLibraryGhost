@@ -1,0 +1,134 @@
+      <!-- AYUDA -->
+      <div x-show="adminSection === 'ayuda'" class="dashboard-surface space-y-6">
+        <div class="dashboard-panel px-4 flex items-center overflow-x-auto scrollbar-hide gap-1">
+          <button @click="ayudaTab = 'docs'" :class="ayudaTab === 'docs' ? 'tab-item tab-active' : 'tab-item'" class="whitespace-nowrap flex-shrink-0"><i class="fa-solid fa-book mr-1"></i> Documentacion</button>
+          <button @click="ayudaTab = 'guias'" :class="ayudaTab === 'guias' ? 'tab-item tab-active' : 'tab-item'" class="whitespace-nowrap flex-shrink-0"><i class="fa-solid fa-route mr-1"></i> Guias</button>
+
+          <button @click="ayudaTab = 'atajos'" :class="ayudaTab === 'atajos' ? 'tab-item tab-active' : 'tab-item'" class="whitespace-nowrap flex-shrink-0"><i class="fa-solid fa-keyboard mr-1"></i> Atajos</button>
+          <button @click="ayudaTab = 'accesibilidad'" :class="ayudaTab === 'accesibilidad' ? 'tab-item tab-active' : 'tab-item'" class="whitespace-nowrap flex-shrink-0"><i class="fa-solid fa-universal-access mr-1"></i> Accesibilidad</button>
+        </div>
+        <!-- DOCUMENTACION -->
+        <div x-show="ayudaTab === 'docs'" class="dashboard-panel p-6">
+          <h3 class="font-display font-700 text-ink-900 mb-4">Documentacion del Sistema</h3>
+          <div class="grid sm:grid-cols-2 gap-4">
+            <div class="border border-ink-100 rounded-xl p-4 bg-ink-50">
+              <div class="flex items-center gap-3 mb-2"><i class="fa-solid fa-store text-brand-600"></i><h4 class="font-semibold text-ink-800 text-sm">Modulo de Inicio</h4></div>
+              <p class="text-ink-500 text-xs leading-relaxed">Panel principal con metricas clave, ventas de la semana, gastos del mes, stock bajo y pedidos pendientes.</p>
+            </div>
+            <div class="border border-ink-100 rounded-xl p-4 bg-ink-50">
+              <div class="flex items-center gap-3 mb-2"><i class="fa-solid fa-boxes-stacked text-brand-600"></i><h4 class="font-semibold text-ink-800 text-sm">Modulo de Inventario</h4></div>
+              <p class="text-ink-500 text-xs leading-relaxed">Gestion de productos, registro de lotes, control de stock, alertas de reposicion bajo umbral y valorizacion del inventario.</p>
+            </div>
+            <div class="border border-ink-100 rounded-xl p-4 bg-ink-50">
+              <div class="flex items-center gap-3 mb-2"><i class="fa-solid fa-cash-register text-brand-600"></i><h4 class="font-semibold text-ink-800 text-sm">Modulo de Ventas</h4></div>
+              <p class="text-ink-500 text-xs leading-relaxed">Pedidos online, gestion de estados (pendiente, listo, completado), escaneo de codigos QR y registro de ventas.</p>
+            </div>
+            <div x-show="isAdmin" class="border border-ink-100 rounded-xl p-4 bg-ink-50">
+              <div class="flex items-center gap-3 mb-2"><i class="fa-solid fa-receipt text-brand-600"></i><h4 class="font-semibold text-ink-800 text-sm">Modulo de Gastos</h4></div>
+              <p class="text-ink-500 text-xs leading-relaxed">Registro de gastos fijos, variables, operativos y de mantenimiento. Carga de comprobantes y reportes de gastos.</p>
+            </div>
+            <div x-show="isAdmin" class="border border-ink-100 rounded-xl p-4 bg-ink-50">
+              <div class="flex items-center gap-3 mb-2"><i class="fa-solid fa-users-gear text-brand-600"></i><h4 class="font-semibold text-ink-800 text-sm">Modulo de Usuarios</h4></div>
+              <p class="text-ink-500 text-xs leading-relaxed">Gestion de usuarios, creacion de empleados y clientes, asignacion de roles y control de accesos.</p>
+            </div>
+          </div>
+        </div>
+        <!-- GUIAS -->
+        <div x-show="ayudaTab === 'guias'" class="dashboard-panel p-6">
+          <h3 class="font-display font-700 text-ink-900 mb-4">Guias Rapidas</h3>
+          <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <button @click="verGuia('inventario')" class="border border-ink-100 rounded-xl p-4 hover:border-brand-300 hover:shadow-sm transition-all text-left">
+              <div class="w-10 h-10 rounded-xl bg-brand-50 flex items-center justify-center mb-3"><i class="fa-solid fa-boxes-stacked text-brand-600"></i></div>
+              <h4 class="font-semibold text-ink-800 text-sm mb-1">Gestionar inventario</h4>
+              <p class="text-ink-500 text-xs">Agregar productos, registrar lotes y controlar stock.</p>
+            </button>
+            <button @click="verGuia('ventas')" class="border border-ink-100 rounded-xl p-4 hover:border-brand-300 hover:shadow-sm transition-all text-left">
+              <div class="w-10 h-10 rounded-xl bg-accent-50 flex items-center justify-center mb-3"><i class="fa-solid fa-cash-register text-accent-600"></i></div>
+              <h4 class="font-semibold text-ink-800 text-sm mb-1">Gestionar pedidos online</h4>
+              <p class="text-ink-500 text-xs">Ver pedidos online, cambiar estados y escanear QR.</p>
+            </button>
+            <button @click="verGuia('venta-manual')" class="border border-ink-100 rounded-xl p-4 hover:border-brand-300 hover:shadow-sm transition-all text-left">
+              <div class="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center mb-3"><i class="fa-solid fa-store text-green-600"></i></div>
+              <h4 class="font-semibold text-ink-800 text-sm mb-1">Venta manual</h4>
+              <p class="text-ink-500 text-xs">Realizar ventas presenciales y registrar pagos.</p>
+            </button>
+            <button @click="verGuia('lista-ventas')" class="border border-ink-100 rounded-xl p-4 hover:border-brand-300 hover:shadow-sm transition-all text-left">
+              <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center mb-3"><i class="fa-solid fa-list text-blue-600"></i></div>
+              <h4 class="font-semibold text-ink-800 text-sm mb-1">Lista de ventas</h4>
+              <p class="text-ink-500 text-xs">Consultar, filtrar y gestionar ventas registradas.</p>
+            </button>
+            <button x-show="isAdmin" @click="verGuia('gastos')" class="border border-ink-100 rounded-xl p-4 hover:border-brand-300 hover:shadow-sm transition-all text-left">
+              <div class="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center mb-3"><i class="fa-solid fa-receipt text-green-600"></i></div>
+              <h4 class="font-semibold text-ink-800 text-sm mb-1">Registrar gastos</h4>
+              <p class="text-ink-500 text-xs">Crear gastos con comprobante y clasificar por tipo.</p>
+            </button>
+            <button x-show="isAdmin" @click="verGuia('usuarios')" class="border border-ink-100 rounded-xl p-4 hover:border-brand-300 hover:shadow-sm transition-all text-left">
+              <div class="w-10 h-10 rounded-xl bg-brand-50 flex items-center justify-center mb-3"><i class="fa-solid fa-users-gear text-brand-600"></i></div>
+              <h4 class="font-semibold text-ink-800 text-sm mb-1">Gestionar usuarios</h4>
+              <p class="text-ink-500 text-xs">Crear empleados y administrar accesos.</p>
+            </button>
+            <button @click="verGuia('general')" class="border border-ink-100 rounded-xl p-4 hover:border-brand-300 hover:shadow-sm transition-all text-left">
+              <div class="w-10 h-10 rounded-xl bg-ink-100 flex items-center justify-center mb-3"><i class="fa-solid fa-circle-info text-ink-600"></i></div>
+              <h4 class="font-semibold text-ink-800 text-sm mb-1">Guia general</h4>
+              <p class="text-ink-500 text-xs">Vista general del sistema y navegacion.</p>
+            </button>
+          </div>
+        </div>
+
+        <!-- ATAJOS -->
+        <div x-show="ayudaTab === 'atajos'" class="dashboard-panel p-6">
+          <h3 class="font-display font-700 text-ink-900 mb-4"><i class="fa-solid fa-keyboard text-brand-600 mr-2"></i>Atajos de Teclado</h3>
+          <div class="grid sm:grid-cols-2 gap-4">
+            <div class="flex items-center justify-between p-3 bg-ink-50 rounded-xl">
+              <span class="text-sm text-ink-700">Buscar en inventario</span>
+              <div class="flex gap-1"><span class="kbd">Ctrl</span><span class="text-ink-400">+</span><span class="kbd">K</span></div>
+            </div>
+            <div x-show="isAdmin" class="flex items-center justify-between p-3 bg-ink-50 rounded-xl">
+              <span class="text-sm text-ink-700">Ir al inicio</span>
+              <div class="flex gap-1"><span class="kbd">Alt</span><span class="text-ink-400">+</span><span class="kbd">1</span></div>
+            </div>
+            <div class="flex items-center justify-between p-3 bg-ink-50 rounded-xl">
+              <span class="text-sm text-ink-700">Ir a inventario</span>
+              <div class="flex gap-1"><span class="kbd">Alt</span><span class="text-ink-400">+</span><span class="kbd">2</span></div>
+            </div>
+            <div class="flex items-center justify-between p-3 bg-ink-50 rounded-xl">
+              <span class="text-sm text-ink-700">Ir a venta manual</span>
+              <div class="flex gap-1"><span class="kbd">Alt</span><span class="text-ink-400">+</span><span class="kbd">3</span></div>
+            </div>
+            <div class="flex items-center justify-between p-3 bg-ink-50 rounded-xl">
+              <span class="text-sm text-ink-700">Ir a lista de ventas</span>
+              <div class="flex gap-1"><span class="kbd">Alt</span><span class="text-ink-400">+</span><span class="kbd">4</span></div>
+            </div>
+            <div x-show="isAdmin" class="flex items-center justify-between p-3 bg-ink-50 rounded-xl">
+              <span class="text-sm text-ink-700">Ir a gastos</span>
+              <div class="flex gap-1"><span class="kbd">Alt</span><span class="text-ink-400">+</span><span class="kbd">5</span></div>
+            </div>
+            <div x-show="isAdmin" class="flex items-center justify-between p-3 bg-ink-50 rounded-xl">
+              <span class="text-sm text-ink-700">Ir a usuarios</span>
+              <div class="flex gap-1"><span class="kbd">Alt</span><span class="text-ink-400">+</span><span class="kbd">6</span></div>
+            </div>
+            <div class="flex items-center justify-between p-3 bg-ink-50 rounded-xl">
+              <span class="text-sm text-ink-700">Ir a centro de ayuda</span>
+              <div class="flex gap-1"><span class="kbd">Alt</span><span class="text-ink-400">+</span><span class="kbd">7</span></div>
+            </div>
+          </div>
+        </div>
+        <!-- ACCESIBILIDAD -->
+        <div x-show="ayudaTab === 'accesibilidad'" class="dashboard-panel p-6">
+          <h3 class="font-display font-700 text-ink-900 mb-4"><i class="fa-solid fa-universal-access text-special-600 mr-2"></i>Accesibilidad</h3>
+          <p class="text-ink-500 text-sm mb-6">Configura opciones de accesibilidad para mejorar tu experiencia en el panel administrativo.</p>
+          <div class="space-y-4">
+            <div class="flex items-center justify-between p-4 bg-ink-50 rounded-xl">
+              <div>
+                <h4 class="font-semibold text-ink-800 text-sm"><i class="fa-solid fa-eye-low-vision text-brand-600 mr-2"></i>Modo para daltonismo</h4>
+                <p class="text-ink-400 text-xs mt-0.5">Mejora el contraste y agrega patrones visuales para distinguir estados sin depender del color.</p>
+              </div>
+              <label class="a11y-toggle">
+                <input type="checkbox" :checked="$store.a11y.colorblind" @change="$store.a11y.toggleColorblind()">
+                <span class="toggle-track"></span>
+                <span class="toggle-label sr-only" x-text="$store.a11y.colorblind ? 'Activado' : 'Desactivado'"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>

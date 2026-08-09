@@ -1,0 +1,71 @@
+{% extends "emails/base_email.html" %}
+{% load static %}
+
+{% block email_title %}Tu pedido está listo - {{ company_name }}{% endblock %}
+
+{% block content %}
+<table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;">
+  <tr>
+    <td style="text-align:center;padding-bottom:24px;">
+      <h2 style="margin:0 0 8px;color:#1e3a5f;font-size:22px;font-weight:700;">¡Tu pedido está listo!</h2>
+      <p style="margin:0;color:#6b7280;font-size:15px;line-height:1.6;">
+        Hola <strong>{{ user.first_name|default:user.username }}</strong>,
+        tu pedido ya se encuentra listo para que puedas recogerlo.
+      </p>
+    </td>
+  </tr>
+  <tr>
+    <td style="padding:20px 0;">
+      <table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;background-color:#f9fafb;border-radius:12px;padding:20px;">
+        <tr>
+          <td>
+            <table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;">
+              <tr>
+                <td style="padding:6px 0;color:#6b7280;font-size:14px;">Código de pedido</td>
+                <td style="padding:6px 0;color:#1e3a5f;font-size:14px;font-weight:600;text-align:right;">#{{ order.pk }}</td>
+              </tr>
+              <tr>
+                <td style="padding:6px 0;color:#6b7280;font-size:14px;">Fecha</td>
+                <td style="padding:6px 0;color:#1e3a5f;font-size:14px;font-weight:600;text-align:right;">{{ order.created_at|date:"d/m/Y H:i" }}</td>
+              </tr>
+              <tr>
+                <td style="padding:6px 0;color:#6b7280;font-size:14px;">Estado</td>
+                <td style="padding:6px 0;text-align:right;"><span style="display:inline-block;background-color:#dcfce7;color:#166534;padding:4px 12px;border-radius:20px;font-size:13px;font-weight:600;">Listo para entrega</span></td>
+              </tr>
+              <tr>
+                <td style="padding:6px 0;color:#6b7280;font-size:14px;">Método de pago</td>
+                <td style="padding:6px 0;color:#1e3a5f;font-size:14px;font-weight:600;text-align:right;">{{ order.get_payment_method_display|default:"Efectivo" }}</td>
+              </tr>
+              <tr>
+                <td style="padding:6px 0;color:#6b7280;font-size:14px;border-top:1px solid #e5e7eb;">Total</td>
+                <td style="padding:6px 0;color:#1e3a5f;font-size:16px;font-weight:700;text-align:right;border-top:1px solid #e5e7eb;">S/ {{ order.total|floatformat:2 }}</td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <td style="padding:12px 0;">
+      <p style="margin:0;color:#4b5563;font-size:14px;line-height:1.6;">
+        Por favor, acércate a nuestro local para recoger tu pedido. No olvides llevar tu código de pedido para agilizar la entrega.
+      </p>
+    </td>
+  </tr>
+  <tr>
+    <td style="text-align:center;padding:24px 0 8px;">
+      <a href="{{ protocol|default:'https' }}://{{ domain|default:'localhost' }}/pedidos/"
+         style="display:inline-block;background:linear-gradient(135deg, #1e3a5f 0%, #2a4f7f 100%);color:#ffffff;text-decoration:none;padding:14px 36px;border-radius:10px;font-size:15px;font-weight:600;">
+        Ver mis pedidos
+      </a>
+    </td>
+  </tr>
+  <tr>
+    <td style="text-align:center;padding-top:20px;">
+      <p style="margin:0;color:#9ca3af;font-size:13px;">¡Gracias por tu preferencia!</p>
+      <p style="margin:4px 0 0;color:#6b7280;font-size:14px;font-weight:600;">El equipo de {{ company_name }}</p>
+    </td>
+  </tr>
+</table>
+{% endblock %}

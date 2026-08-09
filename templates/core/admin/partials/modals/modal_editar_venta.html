@@ -1,0 +1,51 @@
+<div x-show="showModalEditarVenta" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-bg" @click.self="showModalEditarVenta = false" @keydown.escape.window="showModalEditarVenta = false" role="dialog" aria-modal="true" aria-labelledby="modal-editar-venta" style="display:none">
+  <div class="bg-white rounded-2xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto" @click.stop>
+    <div class="flex items-center justify-between p-5 border-b border-ink-100">
+      <h3 id="modal-editar-venta" class="text-2xl font-display font-700 text-ink-900">Editar Venta</h3>
+      <button @click="showModalEditarVenta = false" class="w-8 h-8 rounded-lg hover:bg-ink-100 flex items-center justify-center text-ink-400" aria-label="Cerrar modal"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="p-5 space-y-4" x-show="ventaEditar">
+      <p class="text-sm text-ink-500">Venta: <span class="font-semibold text-ink-800" x-text="ventaEditar?.boleta_code || '#V-' + (ventaEditar?.id || '')"></span></p>
+      <div>
+        <label class="block text-xs font-semibold text-ink-500 uppercase tracking-wide mb-1.5">Cliente</label>
+        <input x-model="ventaEditar.cliente" type="text" class="inp" placeholder="Nombre del cliente">
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-ink-500 uppercase tracking-wide mb-1.5">Total</label>
+        <input x-model.number="ventaEditar.total" type="number" step="0.01" class="inp" placeholder="0.00">
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-ink-500 uppercase tracking-wide mb-1.5">Metodo de pago</label>
+        <select x-model="ventaEditar.metodo" class="inp">
+          <option value="Efectivo">Efectivo</option>
+          <option value="Yape">Yape</option>
+          <option value="Plin">Plin</option>
+          <option value="Transferencia">Transferencia</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-ink-500 uppercase tracking-wide mb-1.5">Canal</label>
+        <select x-model="ventaEditar.canal" class="inp">
+          <option value="Online">Online</option>
+          <option value="Presencial">Presencial</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-ink-500 uppercase tracking-wide mb-1.5">Estado</label>
+        <select x-model="ventaEditar.estado" class="inp">
+          <option value="Pendiente">Pendiente</option>
+          <option value="Completada">Completada</option>
+          <option value="Cancelada">Cancelada</option>
+        </select>
+      </div>
+      <div x-show="ventaEditar.estado === 'Cancelada'">
+        <label class="block text-xs font-semibold text-ink-500 uppercase tracking-wide mb-1.5">Justificacion de cancelacion</label>
+        <textarea x-model="ventaEditar.justificacion" class="inp" rows="3" placeholder="Motivo de la cancelacion..."></textarea>
+      </div>
+      <div class="flex gap-3">
+        <button @click="showModalEditarVenta = false" class="btn-ghost flex-1" aria-label="Cerrar modal">Cerrar</button>
+        <button @click="guardarVenta()" class="btn-primary flex-1 py-3 text-sm font-bold shadow-lg shadow-brand-200"><i class="fa-solid fa-floppy-disk"></i> Guardar Cambios</button>
+      </div>
+    </div>
+  </div>
+</div>

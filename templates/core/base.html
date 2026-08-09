@@ -1,0 +1,158 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="csrf-token" content="{{ csrf_token }}" />
+  <meta name="user-is-authenticated" content="{{ user.is_authenticated|yesno:'true,false' }}" />
+  <meta name="login-url" content="{% url 'login' %}" />
+  <link rel=icon type="image/png" href="{% static 'src/images/logo_sin_fondo.png' %}" />
+  <title>{% block title %}Ghostitzer — Librería y útiles escolares{% endblock %}</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+   <link rel="stylesheet" href="{% static 'dist/css/app.css' %}?v=10" />
+
+  <script defer src="{% static 'dist/js/app.js' %}"></script>
+
+  <style>
+    /* === SHARED COMPONENT STYLES === */
+
+    /* Price — clean, bold, high-contrast */
+    .price-catalog {
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 700;
+      color: #0f172a;
+      letter-spacing: -.01em;
+    }
+    .price-catalog .price-sym {
+      font-size: .72em;
+      font-weight: 600;
+      color: #64748b;
+      margin-right: 1px;
+    }
+
+    /* Staggered entrance */
+    .stagger-in {
+      opacity: 0;
+      transform: translateY(20px) scale(.98);
+      transition: opacity .45s cubic-bezier(.4,0,.2,1), transform .45s cubic-bezier(.4,0,.2,1);
+    }
+    .stagger-in.show {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    /* Line clamp */
+    .line-clamp-2 {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    /* Out-of-stock badge */
+    .badge-agotado {
+      position: absolute;
+      top: .75rem;
+      left: .75rem;
+      z-index: 10;
+      background: #ef4444;
+      color: #fff;
+      font-size: .65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      padding: .25rem .6rem;
+      border-radius: 999px;
+    }
+
+    /* Spinner */
+    .spinner-catalog {
+      width: 2.5rem;
+      height: 2.5rem;
+      border: 3px solid #e2e8f0;
+      border-top-color: #2563eb;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      margin: 0 auto;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* View detail circular arrow button (by default on the right) */
+    .view-detail-btn {
+      position: absolute;
+      bottom: .75rem;
+      right: .75rem;
+      z-index: 30;
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: 50%;
+      border: none;
+      background: #fff;
+      color: #2563eb;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: .85rem;
+      transition: all .3s cubic-bezier(.4,0,.2,1);
+      box-shadow: 0 4px 14px rgba(0,0,0,.08);
+      text-decoration: none;
+    }
+    .view-detail-btn:hover {
+      background: #2563eb;
+      color: #fff;
+      box-shadow: 0 4px 16px rgba(37,99,235,.35);
+      transform: scale(1.1);
+    }
+    /* When the cart button is also on the right, shift arrow to its left */
+    .view-detail-btn.shift-left {
+      right: 3.75rem;
+    }
+  </style>
+
+  {% block extra_css %}{% endblock %}
+</head>
+
+<body class="min-h-screen library-bg{% if user_colorblind_mode %} colorblind-mode{% endif %}{% if user_hearing_impaired_mode %} hearing-mode{% endif %}"
+      x-data="accessibilityApp()"
+      x-init="init()">
+  <a href="#main-content" class="skip-link">Ir al contenido principal</a>
+  <div id="main-content">
+    {% block content %}{% endblock %}
+  </div>
+
+  <div class="a11y-toast-container" aria-live="polite" aria-relevant="additions removals">
+    <template x-for="toast in toasts" :key="toast.id">
+      <div class="a11y-toast" :class="{'a11y-toast-exit': toast.leaving}" :data-type="toast.type" role="alert">
+        <div class="a11y-toast-icon" :class="{
+          'bg-green-500 text-white': toast.type === 'success',
+          'bg-red-500 text-white': toast.type === 'error',
+          'bg-amber-500 text-white': toast.type === 'warning',
+          'bg-blue-500 text-white': toast.type === 'info'
+        }">
+          <i :class="{
+            'fa-solid fa-check': toast.type === 'success',
+            'fa-solid fa-xmark': toast.type === 'error',
+            'fa-solid fa-triangle-exclamation': toast.type === 'warning',
+            'fa-solid fa-circle-info': toast.type === 'info'
+          }"></i>
+        </div>
+        <div class="a11y-toast-body">
+          <div class="a11y-toast-title" x-text="toast.title"></div>
+          <div class="a11y-toast-desc" x-text="toast.description || ''" x-show="toast.description"></div>
+        </div>
+        <button class="a11y-toast-close" @click="removeToast(toast.id)" aria-label="Cerrar notificación">&times;</button>
+      </div>
+    </template>
+  </div>
+
+  <div class="a11y-sr-only" aria-live="assertive" aria-atomic="true"></div>
+
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,146 @@
+<!-- INVENTARIO -->
+      <div x-show="adminSection === 'inventario'" class="dashboard-surface space-y-4">
+        <div class="grid grid-cols-2 xl:grid-cols-4 gap-3">
+          <div class="dashboard-metric-card fade-up p-3 min-h-[9.5rem] flex flex-col justify-between">
+            <div class="flex items-start justify-between gap-2">
+              <div class="space-y-1 min-w-0">
+                <p class="text-[10px] font-semibold uppercase tracking-[0.15em] text-ink-500">Productos</p>
+                <div class="text-2xl font-display font-800 text-ink-900" x-text="productos.length"></div>
+              </div>
+              <div class="w-10 h-10 rounded-xl flex items-center justify-center text-white shrink-0" style="background:linear-gradient(135deg,#4c5bd0,#8ba3ff);">
+                <i class="fa-solid fa-book text-sm"></i>
+              </div>
+            </div>
+            <p class="text-xs text-ink-500">Total disponibles</p>
+          </div>
+          <div class="dashboard-metric-card fade-up-d1 p-3 min-h-[9.5rem] flex flex-col justify-between">
+            <div class="flex items-start justify-between gap-2">
+              <div class="space-y-1 min-w-0">
+                <p class="text-[10px] font-semibold uppercase tracking-[0.15em] text-ink-500">Stock Bajo</p>
+                <div class="text-2xl font-display font-800 text-accent-600" x-text="productos.filter(p => productoStock(p) < p.umbral).length"></div>
+              </div>
+              <div class="w-10 h-10 rounded-xl flex items-center justify-center text-white shrink-0" style="background:linear-gradient(135deg,#f97316,#fb923c);">
+                <i class="fa-solid fa-triangle-exclamation text-sm"></i>
+              </div>
+            </div>
+            <p class="text-xs text-ink-500">Productos por debajo del umbral</p>
+          </div>
+          <div class="dashboard-metric-card fade-up-d2 p-3 min-h-[9.5rem] flex flex-col justify-between">
+            <div class="flex items-start justify-between gap-2">
+              <div class="space-y-1 min-w-0">
+                <p class="text-[10px] font-semibold uppercase tracking-[0.15em] text-ink-500">Inversión</p>
+                <div class="text-xl font-display font-800 text-ink-900" x-text="'S/ ' + productos.reduce((s, p) => s + (productoPrecio(p) * productoStock(p)), 0).toFixed(2)"></div>
+              </div>
+              <div class="w-10 h-10 rounded-xl flex items-center justify-center text-white shrink-0" style="background:linear-gradient(135deg,#0f766e,#14b8a6);">
+                <i class="fa-solid fa-wallet text-sm"></i>
+              </div>
+            </div>
+            <p class="text-xs text-ink-500">Valor total del inventario</p>
+          </div>
+          <div class="dashboard-metric-card fade-up-d3 p-3 min-h-[9.5rem] flex flex-col justify-between">
+            <div class="flex items-start justify-between gap-2">
+              <div class="space-y-1 min-w-0">
+                <p class="text-[10px] font-semibold uppercase tracking-[0.15em] text-ink-500">Stock Normal</p>
+                <div class="text-2xl font-display font-800 text-ink-900" x-text="productos.filter(p => productoStock(p) >= p.umbral).length"></div>
+              </div>
+              <div class="w-10 h-10 rounded-xl flex items-center justify-center text-white shrink-0" style="background:linear-gradient(135deg,#16a34a,#4ade80);">
+                <i class="fa-solid fa-check text-sm"></i>
+              </div>
+            </div>
+            <p class="text-xs text-ink-500">Productos con stock estable</p>
+          </div>
+        </div>
+
+        {# Boton de registrar #}
+        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-99">
+          <button type="button" @click="resetFormProducto(); showModalAgregarProducto = true" class="btn-primary">
+            <i class="fa-solid fa-plus-circle text-lg"></i>
+            <span>Registrar Producto</span>
+          </button>
+        </div>
+
+        {# Buscar y Filtrar #}
+        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-99">
+          <div class="flex items-center gap-3 flex-1">
+            <div class="relative flex-1 max-96">
+              <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-ink-400 text-sm"></i>
+              <input x-model="busquedaInventario" type="text" class="inp pl-9" placeholder="Buscar producto...">
+            </div>
+            <select x-model="filtroCategoria" class="inp w-auto">
+              <option value="">Todas las categorias</option>
+              <template x-for="cat in categorias" :key="cat.id">
+                <option :value="cat.name" x-text="cat.name"></option>
+              </template>
+            </select>
+          </div>
+        </div>
+
+        <div class="dashboard-panel overflow-hidden fade-up-d4">
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <thead><tr class="tbl-head"><th class="text-left">Producto</th><th class="text-left">Codigo</th><th class="text-left">Categoria</th><th class="text-left">P. Venta</th><th class="text-left">Stock</th><th class="text-left">Estado</th><th class="text-left">Acciones</th></tr></thead>
+              <tbody>
+                <template x-for="prod in invPg.items" :key="prod.id">
+                  <tr class="tbl-row">
+                    <td>
+                      <div class="flex items-center gap-3">
+                        <template x-if="prod.imagen">
+                          <img :src="prod.imagen" class="w-10 h-10 rounded-lg object-contain bg-ink-50" alt="imagen">
+                        </template>
+                        <template x-if="!prod.imagen">
+                          <div class="w-8 h-8 rounded-lg flex items-center justify-center" :style="'background:' + prod.color"><i :class="prod.icono + ' text-white text-sm'"></i></div>
+                        </template>
+                        <span class="font-medium text-ink-800 text-sm" x-text="prod.nombre"></span>
+                      </div>
+                    </td>
+                    <td class="font-mono text-xs text-ink-500" x-text="prod.codigo ? prod.codigo.slice(0, 5) : ''" :title="prod.codigo || ''"></td>
+                    <td><span class="badge bg-ink-100 text-ink-600"><span class="cb-icon" style="display:none"><i class="fa-solid fa-tag mr-1"></i> </span><span x-text="prod.categoria"></span></span></td>
+                    <td class="font-display font-700 text-ink-900 text-sm" x-text="'S/ ' + productoPrecio(prod).toFixed(2)"></td>
+
+                    <td>
+                      <div class="flex items-center gap-2">
+                        <div class="w-16 h-2 rounded-full bg-ink-100 overflow-hidden">
+                          <div class="h-full rounded-full" :class="productoStock(prod) < prod.umbral ? 'bg-red-500' : 'bg-green-500'" :style="'width:' + Math.min(100, (productoStock(prod) / 50) * 100) + '%'"></div>
+                        </div>
+                        <span class="text-sm" :class="productoStock(prod) < prod.umbral ? 'text-accent-600 font-semibold' : 'text-ink-600'" x-text="productoStock(prod)"></span>
+                      </div>
+                    </td>
+                    <td>
+                      <span x-show="productoStock(prod) < prod.umbral" class="badge bg-red-100 text-red-700"><i class="fa-solid fa-triangle-exclamation text-xs"></i> Stock bajo</span>
+                      <span x-show="productoStock(prod) >= prod.umbral" class="badge bg-green-100 text-green-700"><span class="cb-icon" style="display:none"><i class="fa-solid fa-check-circle mr-1"></i> </span>Disponible</span>
+                    </td>
+                    <td>
+                      <div class="flex gap-1.5">
+                        <button @click="verProducto(prod)" class="btn-action-view" title="Ver"><i class="fa-regular fa-eye text-xs"></i></button>
+                        <button @click="editarProducto(prod)" class="btn-action-edit" title="Editar"><i class="fa-regular fa-pen-to-square text-xs"></i></button>
+                        <button @click="abrirRegistrarLote(prod)" class="btn-action-add" title="Registrar Lote"><i class="fa-solid fa-box-open text-xs"></i></button>
+                        <button @click="abrirEditarLote(prod)" class="btn-action-edit" title="Editar Lote" x-show="prod.lotes && prod.lotes.length > 0">
+                          <i class="fa-solid fa-file-pen text-xs"></i>
+                        </button>
+                        <button @click="confirmarEliminarProducto(prod)" class="btn-action-delete" title="Eliminar"><i class="fa-regular fa-trash-can text-xs"></i></button>
+                      </div>
+                    </td>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
+          </div>
+          <div class="pagination" x-show="invPg.total > 0">
+            <p class="pagination-info">Mostrando <span x-text="((invPg.currentPage - 1) * PER_PAGE) + 1"></span>-<span x-text="Math.min(invPg.currentPage * PER_PAGE, invPg.total)"></span> de <span x-text="invPg.total"></span></p>
+            <div class="pagination-btns">
+              <button @click="invPage = 1" :disabled="invPg.currentPage === 1" class="page-btn"><i class="fa-solid fa-angles-left text-xs"></i></button>
+              <button @click="invPage = Math.max(1, invPage - 1)" :disabled="invPg.currentPage === 1" class="page-btn"><i class="fa-solid fa-chevron-left text-xs"></i></button>
+              <template x-for="p in getPageRange(invPg.currentPage, invPg.totalPages)" :key="'inv-'+p">
+                <button x-show="p !== '...'" @click="invPage = p" :class="p === invPg.currentPage ? 'page-active' : ''" class="page-btn" x-text="p"></button>
+                <span x-show="p === '...'" class="page-ellipsis">...</span>
+              </template>
+              <button @click="invPage = Math.min(invPg.totalPages, invPage + 1)" :disabled="invPg.currentPage === invPg.totalPages" class="page-btn"><i class="fa-solid fa-chevron-right text-xs"></i></button>
+              <button @click="invPage = invPg.totalPages" :disabled="invPg.currentPage === invPg.totalPages" class="page-btn"><i class="fa-solid fa-angles-right text-xs"></i></button>
+            </div>
+          </div>
+          <div x-show="invPg.total === 0" class="px-6 py-12 text-center text-ink-400">
+            <i class="fa-solid fa-box-open text-4xl mb-3 inline-block"></i>
+            <p class="font-display font-600">No se encontraron productos</p>
+          </div>
+        </div>
+      </div>

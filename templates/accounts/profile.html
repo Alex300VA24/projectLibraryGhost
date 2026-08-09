@@ -1,0 +1,116 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Mi Perfil — Libreria Ghostitzer{% endblock %}
+
+{% block content %}
+<div class="bg-ink-50 min-h-screen">
+{% include 'core/_navbar.html' %}
+<main class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+  <div class="flex items-center gap-4 mb-8">
+    <div class="w-16 h-16 rounded-full bg-brand-600 flex items-center justify-center text-white text-2xl font-bold">
+      {{ user.first_name|first|default:user.username|first }}
+    </div>
+    <div>
+      <h1 class="font-display font-800 text-2xl text-ink-900">Mi Perfil</h1>
+      <p class="text-ink-400 text-sm">Administra tu información personal</p>
+      <div class="bg-blue-50 border border-blue-200 rounded-xl p-3 flex items-start gap-2 mt-2">
+        <i class="fa-solid fa-circle-info text-blue-500 mt-0.5"></i>
+        <p class="text-sm text-blue-700">Los campos marcados con <span class="text-red-500 font-semibold">*</span> son obligatorios</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-2xl border border-ink-200 p-6 prod-card-catalog">
+    <form method="post" action="{% url 'profile' %}" id="profile-form" onsubmit="return saveProfile(event)">
+      {% csrf_token %}
+      <div class="mb-4">
+        <label for="username" class="block text-xs font-semibold text-ink-500 uppercase tracking-wide mb-1.5">Nombre de usuario</span></label>
+        <input type="text" id="username" value="{{ user.username }}" class="inp bg-ink-50" readonly aria-readonly="true">
+      </div>
+      <div class="grid sm:grid-cols-2 gap-4 mb-4">
+        <div>
+          <label for="first_name" class="block text-xs font-semibold text-ink-500 uppercase tracking-wide mb-1.5 required-field">Nombre</label>
+          <input type="text" id="first_name" name="first_name" value="{{ user.first_name }}" class="inp" maxlength="30" required aria-required="true">
+          {% if form.first_name.errors %}<p class="text-red-500 text-xs mt-1" role="alert">{{ form.first_name.errors.0 }}</p>{% endif %}
+        </div>
+        <div>
+          <label for="last_name" class="block text-xs font-semibold text-ink-500 uppercase tracking-wide mb-1.5 required-field">Apellido</label>
+          <input type="text" id="last_name" name="last_name" value="{{ user.last_name }}" class="inp" maxlength="30" required aria-required="true">
+          {% if form.last_name.errors %}<p class="text-red-500 text-xs mt-1" role="alert">{{ form.last_name.errors.0 }}</p>{% endif %}
+        </div>
+      </div>
+      <div class="mb-4">
+        <label for="email" class="block text-xs font-semibold text-ink-500 uppercase tracking-wide mb-1.5 required-field">Correo electrónico</label>
+        <input type="email" id="email" name="email" value="{{ user.email }}" class="inp" required aria-required="true">
+        {% if form.email.errors %}<p class="text-red-500 text-xs mt-1" role="alert">{{ form.email.errors.0 }}</p>{% endif %}
+      </div>
+      <div class="mb-4">
+        <label for="phone" class="block text-xs font-semibold text-ink-500 uppercase tracking-wide mb-1.5">Teléfono <span class="text-ink-400 font-normal lowercase">(opcional)</span></label>
+        <input type="text" id="phone" name="phone" value="{{ profile.phone }}" class="inp" placeholder="+51 989 258 496">
+        {% if form.phone.errors %}<p class="text-red-500 text-xs mt-1" role="alert">{{ form.phone.errors.0 }}</p>{% endif %}
+      </div>
+      <div class="flex gap-3 pt-2">
+        <button type="submit" class="btn-primary" aria-label="Guardar cambios en el perfil"><i class="fa-solid fa-floppy-disk" aria-hidden="true"></i> Guardar cambios</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="bg-white rounded-2xl border border-ink-200 p-6 mt-6 prod-card-catalog">
+    <h2 class="font-display font-700 text-lg text-ink-900 mb-1"><i class="fa-solid fa-lock text-brand-600 mr-2"></i>Cambiar contrasena</h2>
+    <p class="text-ink-400 text-sm mb-4">Actualiza tu contrasena para mantener tu cuenta segura.</p>
+    <form id="password-form" action="{% url 'change_password' %}" onsubmit="return changePassword(event)">
+      {% csrf_token %}
+      <div class="space-y-4">
+        <div>
+          <label for="old_password" class="block text-xs font-semibold text-ink-500 uppercase tracking-wide mb-1.5 required-field">Contrasena actual</label>
+          {% include 'accounts/_password_toggle.html' with field_name='old_password' field_required=True field_autocomplete='current-password' %}
+        </div>
+        <div>
+          <label for="new_password1" class="block text-xs font-semibold text-ink-500 uppercase tracking-wide mb-1.5 required-field">Nueva contrasena</label>
+          {% include 'accounts/_password_toggle.html' with field_name='new_password1' field_required=True field_autocomplete='new-password' %}
+          <p class="text-xs text-ink-400 mt-1" id="password-help">Minimo 8 caracteres. No puede ser solo numeros.</p>
+        </div>
+        <div>
+          <label for="new_password2" class="block text-xs font-semibold text-ink-500 uppercase tracking-wide mb-1.5 required-field">Confirmar nueva contrasena</label>
+          {% include 'accounts/_password_toggle.html' with field_name='new_password2' field_required=True field_autocomplete='new-password' %}
+        </div>
+      </div>
+      <div id="password-msg" class="hidden mb-4 px-4 py-3 rounded-xl text-sm font-medium" role="alert"></div>
+      <div class="flex gap-3 pt-4">
+        <button type="submit" class="btn-primary" aria-label="Actualizar contraseña"><i class="fa-solid fa-key" aria-hidden="true"></i> Actualizar contrasena</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="bg-white rounded-2xl border border-ink-200 p-6 mt-6 prod-card-catalog">
+    <h2 class="font-display font-700 text-lg text-ink-900 mb-1"><i class="fa-solid fa-universal-access text-purple-600 mr-2"></i>Accesibilidad</h2>
+    <p class="text-ink-400 text-sm mb-4">Configura opciones de accesibilidad para mejorar tu experiencia.</p>
+    <div class="space-y-4">
+      <div class="flex items-center justify-between p-4 bg-ink-50 rounded-xl">
+        <div>
+          <h3 class="font-semibold text-ink-800 text-sm"><i class="fa-solid fa-eye-low-vision text-brand-600 mr-2"></i>Modo para daltonismo</h3>
+          <p class="text-ink-400 text-xs mt-0.5">Mejora el contraste y agrega indicadores adicionales para distinguir informacion sin depender del color.</p>
+        </div>
+        <label class="a11y-toggle">
+          <input type="checkbox" :checked="$store.a11y.colorblind" @change="$store.a11y.toggleColorblind()">
+          <span class="toggle-track"></span>
+          <span class="toggle-label sr-only" x-text="$store.a11y.colorblind ? 'Activado' : 'Desactivado'"></span>
+        </label>
+      </div>
+      <div class="flex items-center justify-between p-4 bg-ink-50 rounded-xl">
+        <div>
+          <h3 class="font-semibold text-ink-800 text-sm"><i class="fa-solid fa-ear-deaf text-brand-600 mr-2"></i>Modo para discapacidad auditiva</h3>
+          <p class="text-ink-400 text-xs mt-0.5">Muestra notificaciones visuales detalladas para cada accion importante en el sistema.</p>
+        </div>
+        <label class="a11y-toggle">
+          <input type="checkbox" :checked="$store.a11y.hearing" @change="$store.a11y.toggleHearing()">
+          <span class="toggle-track"></span>
+          <span class="toggle-label sr-only" x-text="$store.a11y.hearing ? 'Activado' : 'Desactivado'"></span>
+        </label>
+      </div>
+    </div>
+  </div>
+</main>
+</div>
+{% endblock %}

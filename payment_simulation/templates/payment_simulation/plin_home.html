@@ -1,0 +1,65 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Plin - Libreria Ghostitzer{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'src/css/phone-sim.css' %}">
+
+<div class="sim-wrapper">
+<div class="phone-frame">
+    <div class="sim-statusbar" style="background:#00C853;">
+        <span class="sim-time">12:30</span>
+        <div class="sim-icons">
+            <svg viewBox="0 0 24 24"><path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3c-1.65-1.66-4.34-1.66-6 0zm-4-4l2 2c2.76-2.76 7.24-2.76 10 0l2-2C15.14 9.14 8.87 9.14 5 13z"/></svg>
+            <svg viewBox="0 0 24 24"><path d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4z"/></svg>
+        </div>
+    </div>
+
+    <div class="sim-header">
+        <div class="sim-back">
+            <a href="{% url 'payment_simulation:plin_entry' %}"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></a>
+        </div>
+        <span class="sim-title">Libreria Ghostitzer</span>
+        <div class="sim-back">
+            <a href="{% url 'payment_simulation:home' %}"><svg viewBox="0 0 24 24" style="stroke:#333;stroke-width:2;fill:none;width:24px;height:24px;"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></a>
+        </div>
+    </div>
+
+    <div class="sim-content">
+        {% if success %}
+        <div class="sim-success-overlay">
+            <div class="sim-success-icon">✓</div>
+            <div class="sim-success-text">Pago exitoso</div>
+            <div class="sim-success-hint">Tu pago ha sido confirmado</div>
+            <a href="{% url 'payment_simulation:home' %}" class="sim-pay-btn plin" style="text-decoration:none;text-align:center;display:block;">Volver</a>
+        </div>
+        {% else %}
+        <div class="w-16 h-16 rounded-xl mx-auto mb-3 flex items-center justify-center overflow-hidden transition-transform duration-300 group-hover:scale-110">
+                <img src="{% static 'src/images/plin_logo.webp' %}" alt="Plin Logo" class="w-full h-full object-cover">
+            </div>
+        <div class="sim-amount sim-plin"><span class="sim-cur">S/</span> {{ order.total|floatformat:2 }}</div>
+        <div class="sim-hint">Pago con Plin</div>
+
+        <form method="post" action="{% url 'payment_simulation:plin_with_order' order_id=order.id %}">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="pay">
+            <button type="submit" class="sim-pay-btn plin" style="margin-bottom:14px;">PLINEAR</button>
+        </form>
+
+        <button class="sim-back-text sim-plin" onclick="document.getElementById('backMenuPlinPedidos').submit();">← Volver a pedidos</button>
+        <form id="backMenuPlinPedidos" method="post" action="{% url 'payment_simulation:plin_with_order' order_id=order.id %}" style="display:none;">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="show_orders">
+        </form>
+        {% endif %}
+    </div>
+
+    <div class="sim-navbar">
+        <div class="sim-navbtn triangle"></div>
+        <div class="sim-navbtn circle"></div>
+        <div class="sim-navbtn"></div>
+    </div>
+</div>
+</div>
+{% endblock %}
