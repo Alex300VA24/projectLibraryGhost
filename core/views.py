@@ -29,6 +29,7 @@ from apps.orders.services.qr_service import generate_qr_base64 as _generate_qr_b
 from apps.products.models import Product, Category, ProductBatch
 from payment_simulation.utils import build_simulation_absolute_uri
 from .models import Expense
+from library_ghostitzer.storage_backends import get_signed_url
 
 User = get_user_model()
 
@@ -695,7 +696,7 @@ def api_gastos(request):
             'monto': float(g.amount),
             'fecha': g.date.strftime('%d/%m/%Y'),
             'descripcion': g.description,
-            'comprobante_url': g.comprobante.url if g.comprobante else None,
+            'comprobante_url': get_signed_url(g.comprobante),
             'comprobante_nombre': g.comprobante.name.split('/')[-1] if g.comprobante else None,
         } for g in gastos]
         return JsonResponse({'gastos': data})
@@ -714,7 +715,7 @@ def api_gastos(request):
         return JsonResponse({
             'success': True,
             'id': gasto.id,
-            'comprobante_url': gasto.comprobante.url if gasto.comprobante else None,
+            'comprobante_url': get_signed_url(gasto.comprobante),
         })
 
 
@@ -731,7 +732,7 @@ def api_gasto_detalle(request, gasto_id):
             'monto': float(gasto.amount),
             'fecha': gasto.date.strftime('%d/%m/%Y'),
             'descripcion': gasto.description,
-            'comprobante_url': gasto.comprobante.url if gasto.comprobante else None,
+            'comprobante_url': get_signed_url(gasto.comprobante),
             'comprobante_nombre': gasto.comprobante.name.split('/')[-1] if gasto.comprobante else None,
         })
     elif request.method == 'POST':
@@ -747,7 +748,7 @@ def api_gasto_detalle(request, gasto_id):
             gasto.comprobante.delete()
             gasto.comprobante = None
         gasto.save()
-        return JsonResponse({'success': True, 'comprobante_url': gasto.comprobante.url if gasto.comprobante else None})
+        return JsonResponse({'success': True, 'comprobante_url': get_signed_url(gasto.comprobante)})
     elif request.method == 'DELETE':
         gasto.delete()
         return JsonResponse({'success': True})

@@ -1,5 +1,12 @@
 from django.db import models
 from django.conf import settings
+from django.core.files.storage import storages
+
+
+def get_documents_storage():
+    if settings.USE_SUPABASE_STORAGE:
+        return storages.create_storage({'BACKEND': 'library_ghostitzer.storage_backends.DocumentsStorage'})
+    return storages['default']
 
 
 class Expense(models.Model):
@@ -17,6 +24,7 @@ class Expense(models.Model):
     description = models.TextField(blank=True, verbose_name='Descripción')
     comprobante = models.FileField(
         upload_to='comprobantes/',
+        storage=get_documents_storage,
         blank=True, null=True,
         verbose_name='Comprobante',
     )
