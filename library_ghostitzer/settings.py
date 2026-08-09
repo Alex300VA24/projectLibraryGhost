@@ -170,14 +170,39 @@ STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
 
-STORAGES = {
-    'default': {
-        'BACKEND': 'django.core.files.storage.FileSystemStorage',
-    },
-    'staticfiles': {
-        'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
-    },
-}
+USE_SUPABASE_STORAGE = os.getenv('USE_SUPABASE_STORAGE', 'False').lower() in {'1', 'true', 'yes', 'on'}
+
+if USE_SUPABASE_STORAGE:
+    STORAGES = {
+        'default': {
+            'BACKEND': 'storages.backends.s3.S3Storage',
+            'OPTIONS': {
+                'access_key': os.getenv('SUPABASE_S3_ACCESS_KEY', ''),
+                'secret_key': os.getenv('SUPABASE_S3_SECRET_KEY', ''),
+                'bucket_name': os.getenv('SUPABASE_S3_BUCKET', ''),
+                'endpoint_url': os.getenv('SUPABASE_S3_ENDPOINT', ''),
+                'region_name': os.getenv('SUPABASE_S3_REGION', ''),
+                'default_acl': 'public-read',
+                'querystring_auth': False,
+                'file_overwrite': False,
+                'client_config': {
+                    'request_checksum_calculation': 'when_required',
+                },
+            },
+        },
+        'staticfiles': {
+            'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
+        },
+    }
+else:
+    STORAGES = {
+        'default': {
+            'BACKEND': 'django.core.files.storage.FileSystemStorage',
+        },
+        'staticfiles': {
+            'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
+        },
+    }
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
