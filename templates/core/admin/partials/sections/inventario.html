@@ -93,7 +93,10 @@
                         <span class="font-medium text-ink-800 text-sm" x-text="prod.nombre"></span>
                       </div>
                     </td>
-                    <td class="font-mono text-xs text-ink-500" x-text="prod.codigo ? prod.codigo.slice(0, 5) : ''" :title="prod.codigo || ''"></td>
+                    <td class="font-mono text-xs text-ink-500" 
+                        x-text="prod.codigo ? prod.codigo.slice(0, 4) + '...' : ''" 
+                        :title="prod.codigo || ''">
+                    </td>
                     <td><span class="badge bg-ink-100 text-ink-600"><span class="cb-icon" style="display:none"><i class="fa-solid fa-tag mr-1"></i> </span><span x-text="prod.categoria"></span></span></td>
                     <td class="font-display font-700 text-ink-900 text-sm" x-text="'S/ ' + productoPrecio(prod).toFixed(2)"></td>
 
