@@ -40,6 +40,7 @@ export const API = {
   DASHBOARD_USUARIO_RESET: (id) => `/dashboard/api/usuarios/${id}/reset-password/`,
   DASHBOARD_USUARIO_TOGGLE: (id) => `/dashboard/api/usuarios/${id}/toggle/`,
   DASHBOARD_VENTA_COMPLETAR: (id) => `/dashboard/api/ventas/${id}/completar-pago/`,
+  DASHBOARD_VENTA_CANCELAR: (id) => `/dashboard/api/ventas/${id}/cancelar/`,
   DASHBOARD_PEDIDO_DETALLE: (id) => `/dashboard/api/pedidos/${id}/detalle/`,
   DASHBOARD_PEDIDO_LISTO: (id) => `/dashboard/api/pedidos/${id}/listo/`,
   DASHBOARD_PEDIDO_COMPLETAR_QR: (id) => `/dashboard/api/pedidos/${id}/completar-qr/`,

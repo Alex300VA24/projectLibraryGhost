@@ -5,7 +5,7 @@
     <template x-if="pagoStep === 1">
       <div>
         <div class="flex items-center justify-between p-5 border-b border-ink-100">
-          <h3 id="modal-pago-venta" class="text-2xl font-display font-700 text-ink-900">Pago de Venta</h3>
+          <h3 id="modal-pago-venta" class="text-2xl font-display font-700 text-ink-900 flex items-center gap-2"><i class="fa-solid fa-credit-card text-brand-600 text-lg" aria-hidden="true"></i>Pago de Venta</h3>
           <button @click="showModalPago = false" class="w-8 h-8 rounded-lg hover:bg-ink-100 flex items-center justify-center text-ink-400" aria-label="Cerrar modal"><i class="fa-solid fa-xmark"></i></button>
         </div>
         <div class="p-5 space-y-4">
@@ -45,7 +45,7 @@
           </div>
           <div class="flex gap-3">
             <button @click="showModalPago = false" class="btn-ghost flex-1">Cerrar</button>
-            <button @click="procesarPago()" class="btn-primary flex-1 py-3 text-sm font-bold shadow-lg shadow-brand-200" :disabled="metodoPago === 'Efectivo' && montoRecibido < ventaTotal"><i class="fa-solid fa-money-bills"></i> Realizar Pago</button>
+            <button @click="procesarPago()" class="btn-primary flex-1 py-3 text-sm font-bold shadow-lg shadow-brand-200 disabled:cursor-not-allowed disabled:opacity-60" :disabled="isActionLoading('procesarPago') || (metodoPago === 'Efectivo' && montoRecibido < ventaTotal)" :aria-busy="isActionLoading('procesarPago')"><i class="fa-solid" :class="isActionLoading('procesarPago') ? 'fa-spinner fa-spin' : 'fa-money-bills'"></i> <span x-text="isActionLoading('procesarPago') ? 'Procesando...' : 'Realizar Pago'"></span></button>
           </div>
         </div>
       </div>

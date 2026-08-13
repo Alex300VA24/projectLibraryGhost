@@ -1,7 +1,7 @@
 <div x-show="showModalBoleta" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-bg" @click.self="showModalBoleta = false" @keydown.escape.window="showModalBoleta = false" role="dialog" aria-modal="true" aria-labelledby="modal-venta-confirmada" style="display:none">
   <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 text-center" @click.stop>
     <div class="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4"><i class="fa-solid fa-circle-check text-green-500 text-3xl"></i></div>
-    <h3 id="modal-venta-confirmada" class="text-2xl font-display font-700 text-ink-900 mb-2">Venta Confirmada</h3>
+    <h3 id="modal-venta-confirmada" class="text-2xl font-display font-700 text-ink-900 mb-2 flex items-center justify-center gap-2"><i class="fa-solid fa-circle-check text-green-600 text-lg" aria-hidden="true"></i>Venta Confirmada</h3>
     <p class="text-ink-500 text-sm mb-4">La venta se registro correctamente.</p>
     <div class="bg-ink-50 rounded-xl p-4 mb-4 text-left space-y-2">
       <div class="flex justify-between text-sm"><span class="text-ink-500">Venta</span><span class="font-mono font-semibold" x-text="boletaVenta?.boleta_code || '#V-' + (boletaVenta?.id || '')"></span></div>

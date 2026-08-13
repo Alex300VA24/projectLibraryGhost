@@ -1,14 +1,14 @@
 <div x-show="showModalConfirmarEliminarProducto" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-bg" @click.self="showModalConfirmarEliminarProducto = false" @keydown.escape.window="showModalConfirmarEliminarProducto = false" role="dialog" aria-modal="true" aria-labelledby="modal-eliminar-producto" style="display:none">
   <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 text-center" @click.stop>
     <div class="w-14 h-14 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4"><i class="fa-solid fa-triangle-exclamation text-red-500 text-xl"></i></div>
-    <h3 id="modal-eliminar-producto" class="text-2xl font-display font-700 text-ink-900 mb-2">Eliminar Producto</h3>
+    <h3 id="modal-eliminar-producto" class="text-2xl font-display font-700 text-ink-900 mb-2 flex items-center justify-center gap-2"><i class="fa-solid fa-trash-can text-red-500 text-lg" aria-hidden="true"></i>Eliminar Producto</h3>
     <p class="text-ink-500 text-sm mb-2">¿Estás seguro de eliminar <span class="font-semibold text-ink-700" x-text="productoEliminar?.nombre"></span>?</p>
     <div class="bg-red-50 border border-red-200 rounded-xl p-3 mb-6">
       <p class="text-xs text-red-600"><i class="fa-solid fa-circle-exclamation mr-1"></i> Esta acción no se puede deshacer. Se eliminarán todos los lotes asociados.</p>
     </div>
     <div class="flex gap-3">
-      <button @click="showModalConfirmarEliminarProducto = false" class="btn-ghost flex-1" aria-label="Cerrar modal"><i class="fa-solid fa-xmark mr-1"></i> Cerrar</button>
-      <button @click="eliminarProducto()" class="btn-danger flex-1 py-3 text-sm font-bold shadow-lg shadow-red-200"><i class="fa-solid fa-trash-can"></i> Eliminar</button>
+      <button @click="showModalConfirmarEliminarProducto = false" :disabled="isActionLoading('eliminarProducto')" class="btn-ghost flex-1 disabled:cursor-not-allowed disabled:opacity-60" aria-label="Cerrar modal"><i class="fa-solid fa-xmark mr-1"></i> Cerrar</button>
+      <button @click="eliminarProducto()" :disabled="isActionLoading('eliminarProducto')" :aria-busy="isActionLoading('eliminarProducto')" class="btn-danger flex-1 py-3 text-sm font-bold shadow-lg shadow-red-200 disabled:cursor-not-allowed disabled:opacity-60"><i class="fa-solid" :class="isActionLoading('eliminarProducto') ? 'fa-spinner fa-spin' : 'fa-trash-can'"></i> <span x-text="isActionLoading('eliminarProducto') ? 'Eliminando...' : 'Eliminar'"></span></button>
     </div>
   </div>
 </div>

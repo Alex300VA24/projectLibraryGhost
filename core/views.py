@@ -673,6 +673,51 @@ def api_venta_completar_pago(request, venta_id):
     return JsonResponse({'success': True})
 
 
+@csrf_exempt
+@require_http_methods(['POST'])
+@_staff_required
+def api_venta_cancelar(request, venta_id):
+    from django.db import transaction
+
+    body = json.loads(request.body) if request.body else {}
+    justificacion = str(body.get('justificacion', '')).strip()[:300]
+
+    with transaction.atomic():
+        order = get_object_or_404(Order.objects.select_for_update(), id=venta_id)
+        if order.status == OrderStatus.CANCELLED:
+            return JsonResponse(
+                {'success': False, 'error': 'La venta ya está cancelada.'},
+                status=400,
+            )
+        if order.status not in (OrderStatus.COMPLETED, OrderStatus.READY):
+            return JsonResponse(
+                {'success': False, 'error': 'Esta venta no se puede cancelar.'},
+                status=400,
+            )
+
+        for item in order.items.select_related('product'):
+            if item.product_id:
+                Product.objects.filter(id=item.product_id).update(
+                    stock=F('stock') + item.quantity
+                )
+
+        old_status = order.status
+        order.status = OrderStatus.CANCELLED
+        order.save(update_fields=['status', 'updated_at'])
+        OrderHistory.objects.create(
+            order=order,
+            user=request.user,
+            action=(
+                f'Cancelar venta: {justificacion}'
+                if justificacion else 'Cancelar venta'
+            ),
+            from_status=old_status,
+            to_status=OrderStatus.CANCELLED,
+        )
+
+    return JsonResponse({'success': True})
+
+
 def _parse_request_body(request):
     if request.content_type and 'multipart' in request.content_type:
         return request.POST.dict(), request.FILES

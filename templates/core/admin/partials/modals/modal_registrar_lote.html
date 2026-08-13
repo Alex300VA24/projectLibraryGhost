@@ -1,7 +1,7 @@
 <div x-show="showModalRegistrarLote" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-bg" @click.self="showModalRegistrarLote = false" @keydown.escape.window="showModalRegistrarLote = false" role="dialog" aria-modal="true" aria-labelledby="modal-registrar-lote" style="display:none">
   <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto" @click.stop>
     <div class="flex items-center justify-between p-5 border-b border-ink-100">
-      <h3 id="modal-registrar-lote" class="text-2xl font-display font-700 text-ink-900" x-text="formLote.modo === 'edit' ? 'Editar Lote' : 'Registrar Lote'"></h3>
+      <h3 id="modal-registrar-lote" class="text-2xl font-display font-700 text-ink-900 flex items-center gap-2"><i class="fa-solid fa-layer-group text-brand-600 text-lg" aria-hidden="true"></i><span x-text="formLote.modo === 'edit' ? 'Editar Lote' : 'Registrar Lote'"></span></h3>
       <button @click="showModalRegistrarLote = false" class="w-8 h-8 rounded-lg hover:bg-ink-100 flex items-center justify-center text-ink-400" aria-label="Cerrar modal"><i class="fa-solid fa-xmark"></i></button>
     </div>
     <div class="p-5 space-y-4">
@@ -65,9 +65,9 @@
         <div class="flex justify-between text-sm border-t border-ink-200 pt-2 mt-2"><span class="text-ink-900 font-semibold">Valor total</span><span class="font-display font-800 text-brand-700" x-text="'S/ ' + ((formLote.precio || 0) * (formLote.cantidad || 0)).toFixed(2)"></span></div>
       </div>
       <div class="flex gap-3">
-        <button @click="showModalRegistrarLote = false" class="btn-ghost flex-1">Cerrar</button>
-        <button @click="guardarLote()" class="btn-primary flex-1 py-3 text-sm font-bold shadow-lg shadow-brand-200">
-          <i class="fa-solid fa-floppy-disk"></i> <span x-text="formLote.modo === 'edit' ? 'Actualizar Lote' : 'Guardar Lote'"></span>
+        <button @click="showModalRegistrarLote = false" :disabled="isActionLoading('guardarLote')" class="btn-ghost flex-1 disabled:cursor-not-allowed disabled:opacity-60">Cerrar</button>
+        <button @click="guardarLote()" :disabled="isActionLoading('guardarLote')" :aria-busy="isActionLoading('guardarLote')" class="btn-primary flex-1 py-3 text-sm font-bold shadow-lg shadow-brand-200 disabled:cursor-not-allowed disabled:opacity-60">
+          <i class="fa-solid" :class="isActionLoading('guardarLote') ? 'fa-spinner fa-spin' : 'fa-floppy-disk'"></i> <span x-text="isActionLoading('guardarLote') ? (formLote.modo === 'edit' ? 'Actualizando...' : 'Guardando...') : (formLote.modo === 'edit' ? 'Actualizar Lote' : 'Guardar Lote')"></span>
         </button>
       </div>
     </div>

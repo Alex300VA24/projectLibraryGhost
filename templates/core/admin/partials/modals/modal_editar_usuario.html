@@ -1,7 +1,7 @@
 <div x-show="showModalEditarUsuario" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-bg" @click.self="showModalEditarUsuario = false" @keydown.escape.window="showModalEditarUsuario = false" role="dialog" aria-modal="true" aria-labelledby="modal-editar-usuario" style="display:none">
   <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto" @click.stop>
     <div class="flex items-center justify-between p-5 border-b border-ink-100">
-      <h3 id="modal-editar-usuario" class="text-2xl font-display font-700 text-ink-900">Editar Usuario</h3>
+      <h3 id="modal-editar-usuario" class="text-2xl font-display font-700 text-ink-900 flex items-center gap-2"><i class="fa-solid fa-user-pen text-brand-600 text-lg" aria-hidden="true"></i>Editar Usuario</h3>
       <button @click="showModalEditarUsuario = false" class="w-8 h-8 rounded-lg hover:bg-ink-100 flex items-center justify-center text-ink-400" aria-label="Cerrar modal"><i class="fa-solid fa-xmark"></i></button>
     </div>
     <div class="p-5 space-y-4" x-show="usuarioEditar">
@@ -47,7 +47,7 @@
       <button @click="restablecerContrasena()" class="w-full text-sm text-brand-600 hover:text-brand-700 font-semibold py-2 border border-brand-200 rounded-xl hover:bg-brand-50 transition-colors"><i class="fa-solid fa-key mr-1"></i> Restablecer contraseña a "Cambiar123++"</button>
       <div class="flex gap-3">
         <button @click="showModalEditarUsuario = false" class="btn-ghost flex-1" aria-label="Cerrar modal">Cerrar</button>
-        <button @click="guardarUsuario()" class="btn-primary flex-1 py-3 text-sm font-bold shadow-lg shadow-brand-200"><i class="fa-solid fa-floppy-disk"></i> Guardar Cambios</button>
+        <button @click="guardarUsuario()" :disabled="isActionLoading('guardarUsuario')" :aria-busy="isActionLoading('guardarUsuario')" class="btn-primary flex-1 py-3 text-sm font-bold shadow-lg shadow-brand-200 disabled:cursor-not-allowed disabled:opacity-60"><i class="fa-solid" :class="isActionLoading('guardarUsuario') ? 'fa-spinner fa-spin' : 'fa-floppy-disk'"></i> <span x-text="isActionLoading('guardarUsuario') ? 'Guardando...' : 'Guardar Cambios'"></span></button>
         
       </div>
     </div>

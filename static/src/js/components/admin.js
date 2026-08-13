@@ -1,6 +1,5 @@
 import { apiFetch } from '../services/api.js';
-import Swal from 'sweetalert2';
-import { SwalError, SwalSuccess, SwalToast, SwalAddToCart } from '../utils/swal.js';
+import { SwalError, SwalSuccess, SwalWarning } from '../utils/swal.js';
 import { usePolling } from '../composables/usePolling.js';
 import { API } from '../services/urls.js';
 import { a11yNotify } from '../utils/notify.js';
@@ -16,7 +15,9 @@ export function adminApp(config = {}) {
     usuarioTab: 'todos',
     ayudaTab: 'docs',
     loading: false,
+    loadingAction: '',
     loadingCrearUsuario: false,
+    cancelandoVenta: false,
 
     busquedaInventario: '',
     filtroCategoria: '',
@@ -271,16 +272,26 @@ export function adminApp(config = {}) {
 
     _notify(title, icon) {
       if (a11yNotify(icon || 'success', title)) return;
-      return SwalToast(icon || 'success', title);
+      return SwalSuccess(title);
     },
+    beginAction(action) {
+      if (this.loadingAction) return false;
+      this.loadingAction = action;
+      return true;
+    },
+    endAction(action) {
+      if (this.loadingAction === action) this.loadingAction = '';
+    },
+    isActionLoading(action) { return this.loadingAction === action; },
 
-    loadDashboard(offset) { if (offset !== undefined) this.weekOffset = offset; apiFetch(API.DASHBOARD_STATS + '?offset=' + this.weekOffset).then(d => { if (d.ventasSemana !== undefined) { this.dashboardData = d; this.chartData = d.chartData || []; this.topProductos = d.topProductos || []; } }); },
+    loadDashboard(offset) { if (offset !== undefined) this.weekOffset = offset; return apiFetch(API.DASHBOARD_STATS + '?offset=' + this.weekOffset).then(d => { if (d.ventasSemana !== undefined) { this.dashboardData = d; this.chartData = d.chartData || []; this.topProductos = d.topProductos || []; } }); },
     navegarSemana(dir) { this.loadDashboard(this.weekOffset + dir); },
     loadProductos() {
-      apiFetch(API.DASHBOARD_PRODUCTOS + '?_=' + Date.now()).then(d => { if (d.productos) this.productos = d.productos; });
+      return apiFetch(API.DASHBOARD_PRODUCTOS + '?_=' + Date.now()).then(d => { if (d.productos) this.productos = d.productos; });
     },
     loadPedidos() { apiFetch(API.DASHBOARD_PEDIDOS).then(d => { if (d.pedidos) this.pedidos = d.pedidos; }); },
-    loadVentas() { apiFetch(API.DASHBOARD_VENTAS).then(d => { if (d.ventas) this.ventas = d.ventas; if (d.trabajadores) this.trabajadores = d.trabajadores; }); },
+    loadVentas() { return apiFetch(API.DASHBOARD_VENTAS + '?_=' + Date.now()).then(d => { if (d.ventas) this.ventas = d.ventas; if (d.trabajadores) this.trabajadores = d.trabajadores; }); },
+    refreshVentas() { return Promise.all([this.loadVentas(), this.loadProductos(), this.loadDashboard()]); },
     loadGastos() { apiFetch(API.DASHBOARD_GASTOS).then(d => { if (d.gastos) this.gastos = d.gastos; }); },
     loadUsuarios() { apiFetch(API.DASHBOARD_USUARIOS).then(d => { if (d.usuarios) this.usuarios = d.usuarios; }); },
     loadCategorias() { apiFetch(API.DASHBOARD_CATEGORIAS).then(d => { if (d.categorias) this.categorias = d.categorias; }); },
@@ -356,11 +367,14 @@ export function adminApp(config = {}) {
     editarProducto(prod) { this.formProducto = { ...prod, imagenFile: null, imagenPreview: null }; this.errorNombreProducto = ''; this.errorCategoriaProducto = ''; this.errorPrecioProducto = ''; this.showModalAgregarProducto = true; },
     confirmarEliminarProducto(prod) { this.productoEliminar = prod; this.showModalConfirmarEliminarProducto = true; },
     eliminarProducto() {
+      if (!this.productoEliminar || !this.beginAction('eliminarProducto')) return;
       apiFetch(API.DASHBOARD_PRODUCTO(this.productoEliminar.id), { method: 'DELETE' }).then(() => {
         this.productos = this.productos.filter(p => p.id !== this.productoEliminar.id);
         this.showModalConfirmarEliminarProducto = false;
         this._notify('Producto eliminado');
-      });
+      }).catch(error => {
+        if (!a11yNotify('error', 'Error', error.message)) SwalError('Error', error.message);
+      }).finally(() => this.endAction('eliminarProducto'));
     },
 
     validarProducto() {
@@ -384,7 +398,7 @@ export function adminApp(config = {}) {
     },
 
     guardarProducto() {
-      if (!this.validarProducto()) return;
+      if (!this.validarProducto() || !this.beginAction('guardarProducto')) return;
       const formData = new FormData();
       formData.append('nombre', this.formProducto.nombre || '');
       formData.append('codigo', this.formProducto.codigo || '');
@@ -404,7 +418,8 @@ export function adminApp(config = {}) {
         this.loadProductos();
         this.showModalAgregarProducto = false;
         if (!a11yNotify('success', this.formProducto.id ? 'Producto actualizado' : 'Producto registrado')) SwalSuccess(this.formProducto.id ? 'Producto actualizado' : 'Producto registrado');
-      }).catch(error => { if (!a11yNotify('error', 'Error', error.message || 'No se pudo guardar el producto')) SwalError('Error', error.message || 'No se pudo guardar el producto'); });
+      }).catch(error => { if (!a11yNotify('error', 'Error', error.message || 'No se pudo guardar el producto')) SwalError('Error', error.message || 'No se pudo guardar el producto'); })
+        .finally(() => this.endAction('guardarProducto'));
     },
     resetFormProducto() { this.formProducto = { id: null, nombre: '', codigo: '', categoria: 'Alimentos', precio: 0, umbral: 10, descripcion: '', color: '#d97706', icono: 'fa-solid fa-box', imagen: null, imagenFile: null, imagenPreview: null }; },
     handleProductoImagen(event) {
@@ -431,6 +446,7 @@ export function adminApp(config = {}) {
     },
 
     marcarListoEntrega(pedido) {
+      if (this.showLoadingOverlay) return;
       this.showLoadingOverlay = true;
       apiFetch(API.DASHBOARD_PEDIDO_LISTO(pedido.id), { method: 'POST' }).then(d => {
         this.showLoadingOverlay = false;
@@ -448,6 +464,7 @@ export function adminApp(config = {}) {
     },
 
     marcarListoDirecto(pedido) {
+      if (this.showLoadingOverlay) return;
       this.showLoadingOverlay = true;
       apiFetch(API.DASHBOARD_PEDIDO_LISTO(pedido.id), { method: 'POST' }).then(d => {
         this.showLoadingOverlay = false;
@@ -480,6 +497,7 @@ export function adminApp(config = {}) {
     },
 
     completarPedidoQR(pedido) {
+      if (this.showLoadingOverlay) return;
       this.showModalQRScanner = false;
       this.showLoadingOverlay = true;
       apiFetch(API.DASHBOARD_PEDIDO_COMPLETAR_QR(pedido.id), { method: 'POST' }).then(d => {
@@ -490,13 +508,7 @@ export function adminApp(config = {}) {
           this.loadPedidos();
           this.loadVentas();
           this.loadDashboard();
-          if (!a11yNotify('success', 'Código escaneado correctamente', 'El código QR fue escaneado con éxito y el pedido ha sido completado.')) Swal.fire({
-            icon: 'success',
-            title: 'Código escaneado correctamente',
-            text: 'El código QR fue escaneado con éxito y el pedido ha sido completado.',
-            confirmButtonColor: '#2563eb',
-            customClass: { swal2BorderRadius: '1rem' }
-          });
+          if (!a11yNotify('success', 'Código escaneado correctamente', 'El código QR fue escaneado con éxito y el pedido ha sido completado.')) SwalSuccess('Código escaneado correctamente', 'El código QR fue escaneado con éxito y el pedido ha sido completado.');
         } else {
           if (!a11yNotify('error', 'Error', d.error || 'No se pudo completar el pedido')) SwalError('Error', d.error || 'No se pudo completar el pedido');
         }
@@ -508,10 +520,12 @@ export function adminApp(config = {}) {
     },
 
     validarCodigoManual() {
+      if (this.loadingQRManual) return;
       if (!this.qrCodigoManual || !this.qrCodigoManual.trim()) {
         if (!a11yNotify('warning', 'Código requerido', 'Ingresa el código de boleta del cliente.')) SwalError('Código requerido', 'Ingresa el código de boleta del cliente.');
         return;
       }
+      this.loadingQRManual = true;
       this.showModalQRScanner = false;
       this.showLoadingOverlay = true;
       this.codigoManualUsado = true;
@@ -526,13 +540,7 @@ export function adminApp(config = {}) {
           this.loadPedidos();
           this.loadVentas();
           this.loadDashboard();
-          if (!a11yNotify('success', 'Código validado correctamente', 'El código de boleta fue validado con éxito y el pedido ha sido completado.')) Swal.fire({
-            icon: 'success',
-            title: 'Código validado correctamente',
-            text: 'El código de boleta fue validado con éxito y el pedido ha sido completado.',
-            confirmButtonColor: '#2563eb',
-            customClass: { swal2BorderRadius: '1rem' }
-          });
+          if (!a11yNotify('success', 'Código validado correctamente', 'El código de boleta fue validado con éxito y el pedido ha sido completado.')) SwalSuccess('Código validado correctamente', 'El código de boleta fue validado con éxito y el pedido ha sido completado.');
         } else {
           this.codigoManualUsado = false;
           if (!a11yNotify('error', 'Error', d.error || 'No se pudo validar el código')) SwalError('Error', d.error || 'No se pudo validar el código');
@@ -556,13 +564,7 @@ export function adminApp(config = {}) {
               this.stopQRPolling();
               this.showModalQRScanner = false;
               this.loadPedidos();
-              if (!a11yNotify('success', 'Código escaneado correctamente', 'El código QR fue escaneado con éxito y el pedido ha sido completado.')) Swal.fire({
-                icon: 'success',
-                title: 'Código escaneado correctamente',
-                text: 'El código QR fue escaneado con éxito y el pedido ha sido completado.',
-                confirmButtonColor: '#2563eb',
-                customClass: { popup: 'swal2-border-radius' }
-              });
+              if (!a11yNotify('success', 'Código escaneado correctamente', 'El código QR fue escaneado con éxito y el pedido ha sido completado.')) SwalSuccess('Código escaneado correctamente', 'El código QR fue escaneado con éxito y el pedido ha sido completado.');
             } else if (this.showModalQRScanner && this.pedidoQR) {
               this.pedidoQR = d.order;
             }
@@ -610,15 +612,21 @@ export function adminApp(config = {}) {
 
 
     cambiarEstadoPedido(pedido, nuevoEstado) {
-      apiFetch(API.DASHBOARD_PEDIDO_ESTADO(pedido.id), {
+      if (!pedido || !this.beginAction('cambiarEstadoPedido')) return Promise.resolve(false);
+      return apiFetch(API.DASHBOARD_PEDIDO_ESTADO(pedido.id), {
         method: 'PUT', body: { estado: nuevoEstado }
       }).then(d => {
         if (d.success) {
           pedido.estado = nuevoEstado;
           this._notify('Pedido actualizado a: ' + nuevoEstado);
           this.loadDashboard();
+          return true;
         }
-      });
+        throw new Error(d.error || 'No se pudo actualizar el pedido.');
+      }).catch(error => {
+        if (!a11yNotify('error', 'Error', error.message)) SwalError('Error', error.message);
+        return false;
+      }).finally(() => this.endAction('cambiarEstadoPedido'));
     },
 
     cancelarPedidoAdmin(pedido) {
@@ -627,10 +635,10 @@ export function adminApp(config = {}) {
       this.showModalCancelarPedido = true;
     },
     confirmarCancelarPedido() {
-      if (this.pedidoCancelar) {
-        this.cambiarEstadoPedido(this.pedidoCancelar, 'Cancelado');
-      }
-      this.showModalCancelarPedido = false;
+      if (!this.pedidoCancelar) return;
+      this.cambiarEstadoPedido(this.pedidoCancelar, 'Cancelado').then(success => {
+        if (success) this.showModalCancelarPedido = false;
+      });
     },
 
     verVenta(venta) { this.ventaVer = venta; this.showModalVerVenta = true; },
@@ -661,14 +669,23 @@ export function adminApp(config = {}) {
     },
     confirmarCancelarVenta() {
       const venta = this.ventaCancelar;
-      if (venta) {
-        venta.estado = 'Cancelada';
-        venta.justificacion = this.justificacionCancelarVenta || '';
-        this.loadDashboard();
-        this._notify('Venta cancelada');
-      }
-      this.showModalCancelarVenta = false;
-      this.justificacionCancelarVenta = '';
+      if (!venta || this.cancelandoVenta) return;
+      this.cancelandoVenta = true;
+
+      apiFetch(API.DASHBOARD_VENTA_CANCELAR(venta.id), {
+        method: 'POST',
+        body: { justificacion: this.justificacionCancelarVenta || '' }
+      }).then(d => {
+        if (!d.success) throw new Error(d.error || 'No se pudo cancelar la venta.');
+        this.showModalCancelarVenta = false;
+        this.justificacionCancelarVenta = '';
+        this.ventaCancelar = null;
+        return this.refreshVentas();
+      }).then(() => {
+        if (!a11yNotify('success', 'Venta cancelada correctamente')) SwalSuccess('Venta cancelada correctamente');
+      }).catch(error => {
+        if (!a11yNotify('error', 'Error', error.message)) SwalError('Error', error.message);
+      }).finally(() => { this.cancelandoVenta = false; });
     },
     guardarVenta() {
       const idx = this.ventas.findIndex(v => v.id === this.ventaEditar.id);
@@ -797,6 +814,9 @@ export function adminApp(config = {}) {
           if (!a11yNotify('error', 'Este lote está bloqueado y no puede editarse')) SwalError('Error', 'Este lote está bloqueado y no puede editarse');
           return;
         }
+      }
+      if (!this.beginAction('guardarLote')) return;
+      if (this.formLote.modo === 'edit') {
         const url = API.DASHBOARD_PRODUCTO_LOTE(this.formLote.productoId, this.formLote.loteId);
         apiFetch(url, {
           method: 'PUT', body: this.formLote
@@ -809,7 +829,8 @@ export function adminApp(config = {}) {
             const msg = d.error || 'No se pudo actualizar el lote';
             if (!a11yNotify('error', msg)) SwalError('Error', msg);
           }
-        }).catch(() => { if (!a11yNotify('error', 'Error', 'No se pudo actualizar el lote')) SwalError('Error', 'No se pudo actualizar el lote'); });
+        }).catch(() => { if (!a11yNotify('error', 'Error', 'No se pudo actualizar el lote')) SwalError('Error', 'No se pudo actualizar el lote'); })
+          .finally(() => this.endAction('guardarLote'));
       } else {
         apiFetch(API.DASHBOARD_PRODUCTO_LOTES(this.formLote.productoId), {
           method: 'POST', body: this.formLote
@@ -819,7 +840,8 @@ export function adminApp(config = {}) {
             this.showModalRegistrarLote = false;
             if (!a11yNotify('success', 'Lote registrado')) SwalSuccess('Lote registrado');
           }
-        }).catch(() => { if (!a11yNotify('error', 'Error', 'No se pudo registrar el lote')) SwalError('Error', 'No se pudo registrar el lote'); });
+        }).catch(() => { if (!a11yNotify('error', 'Error', 'No se pudo registrar el lote')) SwalError('Error', 'No se pudo registrar el lote'); })
+          .finally(() => this.endAction('guardarLote'));
       }
     },
 
@@ -844,11 +866,14 @@ export function adminApp(config = {}) {
     },
     confirmarEliminarGasto(gasto) { this.gastoEliminar = gasto; this.showModalConfirmarEliminarGasto = true; },
     eliminarGasto() {
+      if (!this.gastoEliminar || !this.beginAction('eliminarGasto')) return;
       apiFetch(API.DASHBOARD_GASTO(this.gastoEliminar.id), { method: 'DELETE' }).then(() => {
         this.gastos = this.gastos.filter(g => g.id !== this.gastoEliminar.id);
         this.showModalConfirmarEliminarGasto = false;
         this._notify('Gasto eliminado');
-      });
+      }).catch(error => {
+        if (!a11yNotify('error', 'Error', error.message)) SwalError('Error', error.message);
+      }).finally(() => this.endAction('eliminarGasto'));
     },
     validarGasto() {
       var ok = true;
@@ -875,7 +900,7 @@ export function adminApp(config = {}) {
     },
 
     guardarGasto() {
-      if (!this.validarGasto()) return;
+      if (!this.validarGasto() || !this.beginAction('guardarGasto')) return;
       const isEdit = !!this.formGasto.id;
       const url = isEdit ? API.DASHBOARD_GASTO(this.formGasto.id) : API.DASHBOARD_GASTOS;
       const csrf = document.querySelector('meta[name="csrf-token"]')?.content || '';
@@ -887,18 +912,21 @@ export function adminApp(config = {}) {
       }
       if (this.formGasto.comprobanteFile) form.append('comprobante', this.formGasto.comprobanteFile);
       if (this.formGasto.comprobanteClear) form.append('comprobante_clear', 'true');
-      fetch(url, { method: 'POST', body: form, headers: { 'X-CSRFToken': csrf } }).then(r => r.json()).then(() => {
+      fetch(url, { method: 'POST', body: form, headers: { 'X-CSRFToken': csrf } }).then(r => r.json()).then(d => {
+        if (d && d.success === false) throw new Error(d.error || 'No se pudo guardar el gasto.');
         this.loadGastos();
         this.showModalAgregarGasto = false;
         this._notify(isEdit ? 'Gasto actualizado' : 'Gasto creado');
-      });
+      }).catch(error => {
+        if (!a11yNotify('error', 'Error', error.message)) SwalError('Error', error.message);
+      }).finally(() => this.endAction('guardarGasto'));
     },
     resetFormGasto() { this.formGasto = { id: null, concepto: '', tipo: 'Variable', monto: 0, fecha: '', descripcion: '', comprobanteFile: null, comprobantePreview: null }; this.errorConceptoGasto = ''; this.errorTipoGasto = ''; this.errorMontoGasto = ''; this.errorFechaGasto = ''; },
 
     generarReporteGastos() {
       const gastosFiltrados = this.getGastosFiltradas();
       if (gastosFiltrados.length === 0) {
-        if (!a11yNotify('warning', 'No hay gastos para generar el reporte')) SwalToast('warning', 'No hay gastos para generar el reporte');
+        if (!a11yNotify('warning', 'No hay gastos para generar el reporte')) SwalWarning('No hay gastos para generar el reporte');
         return;
       }
 
@@ -1104,38 +1132,47 @@ export function adminApp(config = {}) {
     },
 
     guardarUsuario() {
-      if (!this.validarCamposUsuario('editar')) return;
+      if (!this.validarCamposUsuario('editar') || !this.beginAction('guardarUsuario')) return;
       var bodyEditar = { ...this.usuarioEditar };
       if (bodyEditar.telefono && bodyEditar.telefono.replace(/\+51\s*/, '').trim() === '') bodyEditar.telefono = '';
       apiFetch(API.DASHBOARD_USUARIO(this.usuarioEditar.id), {
         method: 'PUT', body: bodyEditar
       }).then(d => {
-        if (d && d.success === false) { if (!a11yNotify('error', 'Error', d.error || 'No se pudo actualizar el usuario')) SwalError('Error', d.error || 'No se pudo actualizar el usuario'); return; }
+        if (d && d.success === false) throw new Error(d.error || 'No se pudo actualizar el usuario');
         this.loadUsuarios();
         this.showModalEditarUsuario = false;
         this._notify('Usuario actualizado');
-      });
+      }).catch(error => {
+        if (!a11yNotify('error', 'Error', error.message)) SwalError('Error', error.message);
+      }).finally(() => this.endAction('guardarUsuario'));
     },
     restablecerContrasena() {
       this.showModalResetPassword = true;
     },
     confirmarResetPassword() {
+      if (!this.beginAction('resetPassword')) return;
       apiFetch(API.DASHBOARD_USUARIO_RESET(this.usuarioEditar.id), { method: 'POST' }).then(d => {
         if (d && d.success) {
+          this.showModalResetPassword = false;
           if (!a11yNotify('success', 'Contraseña restablecida', 'La nueva contraseña es: Cambiar123++')) SwalSuccess('Contraseña restablecida', 'La nueva contraseña es: Cambiar123++');
         } else { if (!a11yNotify('error', 'Error', 'No se pudo restablecer la contraseña')) SwalError('Error', 'No se pudo restablecer la contraseña'); }
-      });
-      this.showModalResetPassword = false;
+      }).catch(error => {
+        if (!a11yNotify('error', 'Error', error.message)) SwalError('Error', error.message);
+      }).finally(() => this.endAction('resetPassword'));
     },
     desactivarUsuario(usuario) { this.usuarioDesactivar = usuario; this.showModalConfirmarDesactivar = true; },
     toggleUsuarioEstado() {
+      if (!this.usuarioDesactivar || !this.beginAction('toggleUsuario')) return;
       apiFetch(API.DASHBOARD_USUARIO_TOGGLE(this.usuarioDesactivar.id), { method: 'POST' }).then(d => {
         if (d.success) { this.usuarioDesactivar.activo = d.activo; this.showModalConfirmarDesactivar = false; this._notify('Estado de usuario actualizado'); }
-      });
+        else throw new Error(d.error || 'No se pudo actualizar el usuario.');
+      }).catch(error => {
+        if (!a11yNotify('error', 'Error', error.message)) SwalError('Error', error.message);
+      }).finally(() => this.endAction('toggleUsuario'));
     },
 
     crearUsuario() {
-      if (!this.validarCamposUsuario('crear')) return;
+      if (this.loadingCrearUsuario || !this.validarCamposUsuario('crear')) return;
       this.loadingCrearUsuario = true;
       var bodyCrear = { ...this.formNuevoUsuario };
       if (bodyCrear.telefono && bodyCrear.telefono.replace(/\+51\s*/, '').trim() === '') bodyCrear.telefono = '';
@@ -1145,7 +1182,7 @@ export function adminApp(config = {}) {
           this.errorTelefonoCrear = '';
           this.showModalCrearTrabajador = false;
           this.loadUsuarios();
-          if (!a11yNotify('success', 'Usuario creado', 'Contraseña inicial: Cambiar123++')) Swal.fire({ icon: 'success', title: 'Usuario creado', text: 'Contraseña inicial: Cambiar123++', confirmButtonColor: '#2563eb', customClass: { popup: 'swal2-border-radius' } });
+          if (!a11yNotify('success', 'Usuario creado', 'Contraseña inicial: Cambiar123++')) SwalSuccess('Usuario creado', 'Contraseña inicial: Cambiar123++');
         } else { if (!a11yNotify('error', 'Error', d.error || 'No se pudo crear el usuario')) SwalError('Error', d.error || 'No se pudo crear el usuario'); }
       }).catch(() => { if (!a11yNotify('error', 'Error de conexión', 'Intenta de nuevo.')) SwalError('Error de conexión', 'Intenta de nuevo.'); })
         .finally(() => { this.loadingCrearUsuario = false; });
@@ -1163,7 +1200,7 @@ export function adminApp(config = {}) {
       this.showModalPago = true;
     },
     procesarPago() {
-      if (this.metodoPago === 'Efectivo' && this.montoRecibido < this.ventaTotal) return;
+      if ((this.metodoPago === 'Efectivo' && this.montoRecibido < this.ventaTotal) || !this.beginAction('procesarPago')) return;
       apiFetch(API.DASHBOARD_VENTAS, {
         method: 'POST', body: { items: this.carrito, metodo: this.metodoPago }
       }).then(d => {
@@ -1175,14 +1212,18 @@ export function adminApp(config = {}) {
             this.startPagoPolling();
           } else {
             const total = this.ventaTotal;
+            const metodo = this.metodoPago;
             this.carrito = []; this.montoRecibido = 0; this.metodoPago = 'Efectivo';
             this.showModalPago = false; this.showModalBoleta = true;
-            this.boletaVenta = { id: d.id, boleta_code: d.boleta_code || '', cliente: 'Cliente Mostrador', total: total, metodo: this.metodoPago };
-            this.loadVentas(); this.loadProductos(); this.loadDashboard();
-            this._notify('Venta registrada');
+            this.boletaVenta = { id: d.id, boleta_code: d.boleta_code || '', cliente: 'Cliente Mostrador', total: total, metodo: metodo };
+            this.refreshVentas();
           }
+        } else {
+          throw new Error(d.error || 'No se pudo registrar la venta.');
         }
-      });
+      }).catch(error => {
+        if (!a11yNotify('error', 'Error', error.message)) SwalError('Error', error.message);
+      }).finally(() => this.endAction('procesarPago'));
     },
     startPagoPolling() {
       this.pagoPolling = usePolling(() => {
@@ -1191,7 +1232,7 @@ export function adminApp(config = {}) {
             this.pagoPolling.stop();
             apiFetch(API.DASHBOARD_VENTA_COMPLETAR(this.pagoOrderId), { method: 'POST' }).then(() => {
               this.pagoStep = 3;
-              this.loadDashboard();
+              return this.refreshVentas();
             });
           }
         });
@@ -1202,7 +1243,7 @@ export function adminApp(config = {}) {
     cancelarPago() {
       this.stopPagoPolling();
       apiFetch(API.ORDER_CANCEL_UNPAID(this.pagoOrderId), { method: 'POST', body: {} })
-        .then(() => { this.pagoStep = 1; this.showModalPago = false; this._notify('Pago cancelado'); })
+        .then(() => { this.pagoStep = 1; this.showModalPago = false; })
         .catch(() => { this.pagoStep = 1; this.showModalPago = false; });
     },
     cerrarPagoExitoso() {
@@ -1214,8 +1255,8 @@ export function adminApp(config = {}) {
       this.pagoOrderId = null; this.pagoBoletaCode = '';
       this.showModalPago = false;
       this.boletaVenta = { id: orderId, boleta_code: boletaCode, cliente: 'Cliente Mostrador', total: total, metodo: metodo };
-      this.showModalBoleta = true;       this.loadVentas(); this.loadProductos(); this.loadDashboard();
-      this._notify('Pago confirmado');
+      this.showModalBoleta = true;
+      this.refreshVentas();
     },
 
     verGuia(tipo) {

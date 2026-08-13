@@ -1,5 +1,5 @@
 import { getCsrf, apiFetch } from '../services/api.js';
-import { SwalError, SwalToast } from '../utils/swal.js';
+import { SwalError, SwalWarning } from '../utils/swal.js';
 import { statusDisplay, isOrderCancellable } from '../utils/status.js';
 import { API } from '../services/urls.js';
 import { a11yNotify } from '../utils/notify.js';
@@ -248,8 +248,8 @@ export function navbarApp() {
     },
 
     processPayment() {
-      if (!this.paymentMethod) { if (!a11yNotify('warning', 'Selecciona un método de pago')) SwalToast('warning', 'Selecciona un método de pago'); return; }
-      if (this.paymentMethod === 'cash' && this.montoRecibido < this.cartTotal) { if (!a11yNotify('warning', 'Monto insuficiente')) SwalToast('warning', 'Monto insuficiente'); return; }
+      if (!this.paymentMethod) { if (!a11yNotify('warning', 'Selecciona un método de pago')) SwalWarning('Selecciona un método de pago'); return; }
+      if (this.paymentMethod === 'cash' && this.montoRecibido < this.cartTotal) { if (!a11yNotify('warning', 'Monto insuficiente')) SwalWarning('Monto insuficiente'); return; }
 
       apiFetch(API.CHECKOUT, {
         method: 'POST',

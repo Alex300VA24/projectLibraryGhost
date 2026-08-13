@@ -61,3 +61,4 @@ skills-lock.json
 # Agent instructions
 AGENTS.md
 .impeccable/
+.codex/

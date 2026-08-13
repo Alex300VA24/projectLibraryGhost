@@ -48,8 +48,8 @@
               <button @click="verPedidoOnline(pedido)" class="btn-ghost text-xs py-1.5 flex-1">
                 <i class="fa-regular fa-eye mr-1"></i> Ver Pedido
               </button>
-              <button x-show="pedido.estado_key === 'pending'" @click="marcarListoDirecto(pedido)" class="btn-primary text-xs py-1.5 flex-1" :disabled="showLoadingOverlay">
-                <span x-text="showLoadingOverlay ? '...' : 'Listo'"></span>
+              <button x-show="pedido.estado_key === 'pending'" @click="marcarListoDirecto(pedido)" class="btn-primary text-xs py-1.5 flex-1 disabled:cursor-not-allowed disabled:opacity-60" :disabled="showLoadingOverlay" :aria-busy="showLoadingOverlay">
+                <i x-show="showLoadingOverlay" class="fa-solid fa-spinner fa-spin mr-1"></i><span x-text="showLoadingOverlay ? 'Procesando...' : 'Listo'"></span>
               </button>
               <button x-show="pedido.estado_key === 'ready'" @click="abrirQRScanner(pedido)" class="btn-accent text-xs py-1.5 px-3" title="QR">
                 <i class="fa-solid fa-qrcode"></i>

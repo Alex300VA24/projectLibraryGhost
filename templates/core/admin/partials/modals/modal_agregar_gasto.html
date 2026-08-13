@@ -1,7 +1,7 @@
 <div x-show="showModalAgregarGasto" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-bg" @click.self="showModalAgregarGasto = false" @keydown.escape.window="showModalAgregarGasto = false" role="dialog" aria-modal="true" aria-labelledby="modal-registrar-gasto" style="display:none">
   <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto modal-inner-scroll" @click.stop>
     <div class="flex items-center justify-between p-5 border-b border-ink-100">
-      <h3 id="modal-registrar-gasto" class="text-2xl font-display font-700 text-ink-900" x-text="formGasto.id ? 'Editar Gasto' : 'Registrar Gasto'"></h3>
+      <h3 id="modal-registrar-gasto" class="text-2xl font-display font-700 text-ink-900 flex items-center gap-2"><i class="fa-solid fa-coins text-brand-600 text-lg" aria-hidden="true"></i><span x-text="formGasto.id ? 'Editar Gasto' : 'Registrar Gasto'"></span></h3>
       <button @click="showModalAgregarGasto = false" class="w-8 h-8 rounded-lg hover:bg-ink-100 flex items-center justify-center text-ink-400" aria-label="Cerrar modal"><i class="fa-solid fa-xmark"></i></button>
     </div>
     <div class="p-5 space-y-4">
@@ -102,10 +102,10 @@
         <!-- <button @click="showModalAgregarGasto = false; confirmarEliminarGasto(formGasto)" class="w-full text-sm text-red-500 hover:text-red-700 font-semibold py-2 border border-red-200 rounded-xl hover:bg-red-50 transition-colors"><i class="fa-solid fa-trash-can mr-1"></i> Eliminar este gasto</button>-->
       </div>
       <div class="flex gap-3">
-        <button @click="showModalAgregarGasto = false" class="btn-ghost flex-1" aria-label="Cerrar modal">Cerrar</button>
-        <button @click="guardarGasto()" class="btn-primary flex-1 py-3 text-sm font-bold shadow-lg shadow-brand-200">
-            <i class="fa-solid fa-floppy-disk"></i>
-            <span x-text="formGasto.id ? 'Guardar Cambios' : 'Guardar Gasto'"></span>
+        <button @click="showModalAgregarGasto = false" :disabled="isActionLoading('guardarGasto')" class="btn-ghost flex-1 disabled:cursor-not-allowed disabled:opacity-60" aria-label="Cerrar modal">Cerrar</button>
+        <button @click="guardarGasto()" :disabled="isActionLoading('guardarGasto')" :aria-busy="isActionLoading('guardarGasto')" class="btn-primary flex-1 py-3 text-sm font-bold shadow-lg shadow-brand-200 disabled:cursor-not-allowed disabled:opacity-60">
+            <i class="fa-solid" :class="isActionLoading('guardarGasto') ? 'fa-spinner fa-spin' : 'fa-floppy-disk'"></i>
+            <span x-text="isActionLoading('guardarGasto') ? (formGasto.id ? 'Actualizando...' : 'Guardando...') : (formGasto.id ? 'Guardar Cambios' : 'Guardar Gasto')"></span>
         </button>
         
       </div>

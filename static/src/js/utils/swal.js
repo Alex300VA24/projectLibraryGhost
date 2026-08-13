@@ -3,12 +3,15 @@ import Swal from 'sweetalert2';
 const CONFIRM_BLUE = '#2563eb';
 const CANCEL_GRAY = '#78716c';
 const DANGER_RED = '#ef4444';
-const COMMON = { customClass: { popup: 'swal2-border-radius' } };
+const COMMON = {
+  confirmButtonText: 'Aceptar',
+  customClass: { popup: 'swal2-border-radius' }
+};
 
 export { CONFIRM_BLUE, DANGER_RED, CANCEL_GRAY };
 
 export function SwalSuccess(title, text = '') {
-  return Swal.fire({ ...COMMON, icon: 'success', title, text, confirmButtonColor: CONFIRM_BLUE, timer: 2000, showConfirmButton: false });
+  return Swal.fire({ ...COMMON, icon: 'success', title, text, confirmButtonColor: CONFIRM_BLUE });
 }
 
 export function SwalError(title, text = '') {

@@ -15,12 +15,7 @@ export function saveProfile(e) {
     if (d.success) {
       if (!a11yNotify('success', 'Cambios guardados', 'Tu perfil se actualizó correctamente.')) SwalSuccess('Cambios guardados', 'Tu perfil se actualizó correctamente.');
     } else {
-      if (!a11yNotify('error', 'Error', d.errors ? Object.values(d.errors).join(' ') : 'No se pudieron guardar los cambios.')) Swal.fire({
-        icon: 'error', title: 'Error',
-        text: d.errors ? Object.values(d.errors).join(' ') : 'No se pudieron guardar los cambios.',
-        confirmButtonColor: '#2563eb',
-        customClass: { popup: 'swal2-border-radius' }
-      });
+      if (!a11yNotify('error', 'Error', d.errors ? Object.values(d.errors).join(' ') : 'No se pudieron guardar los cambios.')) SwalError('Error', d.errors ? Object.values(d.errors).join(' ') : 'No se pudieron guardar los cambios.');
     }
   }).catch(() => {
     if (!a11yNotify('error', 'Error de conexión', 'Intenta de nuevo.')) SwalError('Error de conexión', 'Intenta de nuevo.');
